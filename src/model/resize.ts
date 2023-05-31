@@ -6,12 +6,9 @@ export function resizeWatcher<T>(target: HTMLElement): AsyncGenerator<T> {
     filter(
       sequence(
         once(target, 'mousedown'),
-        every(
-          any(on(document, 'mousemove'), on(document, 'mouseup')),
-          onlyEvent('mousemove')
-        )
+        every(any(on(document, 'mousemove'), on(document, 'mouseup')), onlyEvent('mousemove')),
       ),
-      onlyEvent('mousemove')
-    )
+      onlyEvent('mousemove'),
+    ),
   );
 }

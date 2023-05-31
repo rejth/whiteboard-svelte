@@ -1,4 +1,4 @@
-import { Writable, writable } from 'svelte/store';
+import { type Writable, writable } from 'svelte/store';
 
 export type Tool = keyof typeof Tools;
 export type ShapeType = Exclude<Tool, 'SELECT' | 'PAN' | 'DELETE'>;

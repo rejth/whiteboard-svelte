@@ -1,6 +1,6 @@
-import { get, Writable, writable } from 'svelte/store';
-import { v4 as uuid } from 'uuid';
-import { ShapeType, toolbarModel, Tools } from '../Toolbar/ToolbarModel';
+import { get, type Writable, writable } from 'svelte/store';
+import { v4 } from 'uuid';
+import { type ShapeType, toolbarModel, Tools } from '../Toolbar/ToolbarModel';
 
 export type ShapeConfig = {
   uuid: string;
@@ -22,7 +22,7 @@ const dimensions: Record<ShapeType, { width: number; height: number }> = {
 };
 
 class CanvasModel {
-  shapeTool: ShapeType | null;
+  shapeTool: ShapeType | null = null;
   shapes: Writable<Set<ShapeConfig>> = writable(new Set());
   selectedShapes: Writable<Set<ShapeConfig>> = writable(new Set());
 
@@ -32,7 +32,7 @@ class CanvasModel {
     });
   }
 
-  #createShape(uuid: string, type: ShapeType, { x, y }): ShapeConfig {
+  #createShape(uuid: string, type: ShapeType, { x, y }: Pick<ShapeConfig, 'x' | 'y'>): ShapeConfig {
     const styles = `
       width: ${dimensions[type].width}em;
       height: ${dimensions[type].height}em;
@@ -61,7 +61,7 @@ class CanvasModel {
   addShape(e: MouseEvent, canvasRect: DOMRect): void {
     if (!this.shapeTool) return;
     const position = this.#getMousePosition(e, canvasRect);
-    const shape = this.#createShape(uuid(), this.shapeTool, position);
+    const shape = this.#createShape(v4(), this.shapeTool, position);
 
     this.shapes.update((store) => store.add(shape));
     this.selectShape(shape);
@@ -82,22 +82,15 @@ class CanvasModel {
     });
   }
 
-  #removeSelectedShapes(
-    store: Set<ShapeConfig>,
-    selected: Set<ShapeConfig>
-  ): Set<ShapeConfig> {
+  #removeSelectedShapes(store: Set<ShapeConfig>, selected: Set<ShapeConfig>): Set<ShapeConfig> {
     return new Set([...store].filter((el) => !selected.has(el)));
   }
 
   deleteShape(): void {
     const selected = get(this.selectedShapes);
 
-    this.selectedShapes.update((store) => {
-      return this.#removeSelectedShapes(store, selected);
-    });
-    this.shapes.update((store) => {
-      return this.#removeSelectedShapes(store, selected);
-    });
+    this.selectedShapes.update((store) => this.#removeSelectedShapes(store, selected));
+    this.shapes.update((store) => this.#removeSelectedShapes(store, selected));
 
     toolbarModel.disableDeleteTool(true);
   }

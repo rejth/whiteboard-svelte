@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { Moveable, Toolbar, Canvas } from '../ui';
+  import { Toolbar, Canvas } from '../ui';
   import './App.css';
 </script>
 
-<div class="board" role="button" tabIndex={0}>
+<div class="board" role="button" tabindex="0">
   <div class="content-wrapper">
     <div class="scroll-wrapper">
       <Canvas />
@@ -33,7 +33,7 @@
   .scroll-wrapper {
     height: 100%;
     overflow: auto;
-    background-color: #F4F4F6;
+    background-color: #f4f4f6;
   }
 
   .tools-wrapper {

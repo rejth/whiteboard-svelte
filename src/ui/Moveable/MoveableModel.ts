@@ -1,5 +1,5 @@
-import { Writable, writable } from 'svelte/store';
-import { ShapeConfig } from '../Canvas/CanvasModel';
+import { type Writable, writable } from 'svelte/store';
+import { type ShapeConfig } from '../Canvas/CanvasModel';
 
 export class MoveableModel {
   config: Writable<ShapeConfig | null> = writable(null);
@@ -11,19 +11,19 @@ export class MoveableModel {
 
   move(e: MouseEvent): void {
     this.config.update((value) => ({
-      ...value,
-      x: value.x + e.movementX,
-      y: value.y + e.movementY,
+      ...(value as ShapeConfig),
+      x: value?.x || 0 + e.movementX,
+      y: value?.y || 0 + e.movementY,
     }));
   }
 
   resize(e: MouseEvent, rect: DOMRect): void {
     const width = this.#ROUND * Math.round(e.clientX / this.#ROUND) - rect.left;
     const height = this.#ROUND * Math.round(e.clientY / this.#ROUND) - rect.top;
-    this.config.update((value) => ({ ...value, width, height }));
+    this.config.update((value) => ({ ...(value as ShapeConfig), width, height }));
   }
 
   select(selected: boolean): void {
-    this.config.update((value) => ({ ...value, selected }));
+    this.config.update((value) => ({ ...(value as ShapeConfig), selected }));
   }
 }

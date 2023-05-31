@@ -1,6 +1,10 @@
-export async function* watch<T>(
-  executor: () => AsyncIterable<T>
-): AsyncGenerator<T> {
+function validateIterable<T>(asyncIterable: AsyncIterable<T>): void {
+  if (typeof asyncIterable[Symbol.asyncIterator] !== 'function') {
+    throw new Error('The object does not have asynchronous iterator and cannot be iterable');
+  }
+}
+
+export async function* watch<T>(executor: () => AsyncIterable<T>): AsyncGenerator<T> {
   while (true) {
     for await (const value of executor()) {
       yield value;
@@ -8,9 +12,7 @@ export async function* watch<T>(
   }
 }
 
-export async function* sequence(
-  ...asyncIterables: AsyncIterable<any>[]
-): AsyncGenerator<any> {
+export async function* sequence(...asyncIterables: AsyncIterable<any>[]): AsyncGenerator<any> {
   for (const iterable of asyncIterables) {
     validateIterable(iterable);
 
@@ -22,7 +24,7 @@ export async function* sequence(
 
 export async function* filter<T>(
   asyncIterable: AsyncIterable<T>,
-  onFilter: (value: T) => boolean
+  onFilter: (value: any) => boolean,
 ): AsyncGenerator<T> {
   validateIterable(asyncIterable);
   const asyncIterator = asyncIterable[Symbol.asyncIterator]();
@@ -36,7 +38,7 @@ export async function* filter<T>(
 
 export async function* every<T>(
   asyncIterable: AsyncIterable<T>,
-  predicate: (value: T) => boolean
+  predicate: (value: T) => boolean,
 ): AsyncGenerator<T> {
   validateIterable(asyncIterable);
 
@@ -46,9 +48,7 @@ export async function* every<T>(
   }
 }
 
-export async function* any(
-  ...asyncIterables: AsyncIterable<any>[]
-): AsyncGenerator<any> {
+export async function* any(...asyncIterables: AsyncIterable<any>[]): AsyncGenerator<any> {
   const asyncIterators = asyncIterables.map((el) => el[Symbol.asyncIterator]());
 
   while (true) {
@@ -56,10 +56,7 @@ export async function* any(
   }
 }
 
-export async function* take<T>(
-  asyncIterable: AsyncIterable<T>,
-  count: number
-): AsyncGenerator<T> {
+export async function* take<T>(asyncIterable: AsyncIterable<T>, count: number): AsyncGenerator<T> {
   validateIterable(asyncIterable);
   const asyncIterator = asyncIterable[Symbol.asyncIterator]();
   let cursor = 0;
@@ -71,15 +68,7 @@ export async function* take<T>(
 }
 
 export function onlyEvent<E extends keyof HTMLElementEventMap>(
-  eventType: E
+  eventType: E,
 ): (event: Event) => boolean {
   return (event) => event.type === eventType;
-}
-
-function validateIterable<T>(asyncIterable: AsyncIterable<T>): void {
-  if (typeof asyncIterable[Symbol.asyncIterator] !== 'function') {
-    throw new Error(
-      'The object does not have asynchronous iterator and cannot be iterable'
-    );
-  }
 }

@@ -1,6 +1,6 @@
 interface ClickOutsideOptions {
   enabled?: boolean;
-  exclude?: HTMLElement[];
+  exclude?: (HTMLElement | null)[];
   handler?: (...arg: any[]) => void;
 }
 
@@ -10,10 +10,7 @@ export function clickOutside(node: HTMLElement, options: ClickOutsideOptions) {
   const handleClick = (event: Event): void => {
     const target = event.target as HTMLElement;
 
-    if (
-      !event.target ||
-      exclude.some((excludedNode) => excludedNode.contains(target))
-    ) {
+    if (!event.target || exclude.some((excludedNode) => excludedNode?.contains(target))) {
       return;
     }
 

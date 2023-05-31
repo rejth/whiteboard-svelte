@@ -23,6 +23,6 @@
     z-index: -1;
 
     box-shadow: 5px 5px 15px 0 rgb(0 0 0 / 12%);
-    background-color: #FFFFFF;
+    background-color: #ffffff;
   }
 </style>

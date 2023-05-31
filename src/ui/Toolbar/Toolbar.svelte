@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { Icon } from '../../shared';
 
   import noteIcon from './assets/note.svg';
@@ -7,45 +7,45 @@
   import panIcon from './assets/pan.svg';
   import trashIcon from './assets/trash.svg';
   import { canvasModel } from '../Canvas/CanvasModel';
-  import { toolbarModel, Tools } from './ToolbarModel';
+  import { toolbarModel, Tools, type Tool } from './ToolbarModel';
 
   const { tool, disableDeletion } = toolbarModel;
 
   $: tools = [
-    { 
-      label: 'Note', 
-      type: Tools.NOTE, 
-      icon: noteIcon, 
+    {
+      label: 'Note',
+      type: Tools.NOTE,
+      icon: noteIcon,
       hoverText: 'Drag to add new text note',
     },
-    { 
-      label: 'Text', 
-      type: Tools.TEXT, 
-      icon: textIcon,       
+    {
+      label: 'Text',
+      type: Tools.TEXT,
+      icon: textIcon,
       hoverText: 'Drag to add new text area',
     },
-    { 
-      label: 'Area', 
-      type: Tools.AREA, 
-      icon: areaIcon,       
+    {
+      label: 'Area',
+      type: Tools.AREA,
+      icon: areaIcon,
       hoverText: 'Drag to add new area for organizing items',
     },
-    { 
-      label: 'Pan', 
-      type: Tools.PAN, 
-      icon: panIcon,       
+    {
+      label: 'Pan',
+      type: Tools.PAN,
+      icon: panIcon,
       hoverText: 'Pan tool',
     },
-    { 
-      label: 'Delete', 
-      type: Tools.DELETE, 
-      icon: trashIcon,       
+    {
+      label: 'Delete',
+      type: Tools.DELETE,
+      icon: trashIcon,
       hoverText: 'Delete selected item(s)',
       disabled: $disableDeletion,
     },
   ];
 
-  const handleClick = (type) => {
+  const handleClick = (type: Tool) => {
     if (type === Tools.DELETE) {
       canvasModel.deleteShape();
       return;
@@ -55,8 +55,8 @@
 </script>
 
 <ul class="toolbar" id="toolbar">
-	{#each tools as { label, type, icon, hoverText, ...options }}
-		<li>
+  {#each tools as { label, type, icon, hoverText, ...options }}
+    <li>
       <span class="tool">
         <span
           class="icon"
@@ -64,16 +64,12 @@
           class:disabled={options?.disabled}
           title={hoverText}
         >
-          <Icon
-            src={icon}
-            alt={label}
-            on:click={() => handleClick(type)}
-          />
+          <Icon src={icon} alt={label} on:click={() => handleClick(type)} />
         </span>
         <span class="text">{label}</span>
       </span>
     </li>
-	{/each}
+  {/each}
 </ul>
 
 <style>
@@ -87,10 +83,10 @@
     justify-content: center;
 
     padding: 0.5em 0.4em 0.2em;
-    box-shadow: 0 2px 6px 0 #00263A0F;
-    background-color: #FFFFFF;
+    box-shadow: 0 2px 6px 0 #00263a0f;
+    background-color: #ffffff;
 
-    border: 2px solid #F4F4F6;
+    border: 2px solid #f4f4f6;
     border-radius: 6px;
     transform: translateX(-50%);
     pointer-events: all;
@@ -118,12 +114,12 @@
   }
 
   .disabled {
-    color: #D3D3D3;
+    color: #d3d3d3;
     pointer-events: none;
   }
 
   .active {
-    background-color: #F4F4F6;
+    background-color: #f4f4f6;
   }
 
   .text {

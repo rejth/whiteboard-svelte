@@ -6,12 +6,9 @@ export function dndWatcher<T>(target: HTMLElement): AsyncGenerator<T> {
     filter(
       sequence(
         once(target, 'mousedown'),
-        every(
-          any(on(window, 'mousemove'), on(window, 'mouseup')),
-          onlyEvent('mousemove')
-        )
+        every(any(on(window, 'mousemove'), on(window, 'mouseup')), onlyEvent('mousemove')),
       ),
-      onlyEvent('mousemove')
-    )
+      onlyEvent('mousemove'),
+    ),
   );
 }

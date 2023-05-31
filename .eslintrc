@@ -1,0 +1,39 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "parser": "@typescript-eslint/parser", // Specifies the ESLint parser
+  "parserOptions": {
+    "project": "./tsconfig.json", // Source file for @typescript-eslint/parser
+    "sourceType": "module", // Allows for the use of imports
+    "createDefaultProgram": true,
+    "ecmaVersion": "latest" // Allows for the parsing of modern ECMAScript features
+  },
+  "plugins": ["svelte3", "@typescript-eslint", "import", "prettier"], // Turn on the plugins and peer plugins
+  "extends": [
+    "airbnb", // Use the recommended rules from @eslint-config-airbnb
+    "airbnb-typescript", // Extends previous rules by rules from @eslint-config-airbnb-typescript
+    "plugin:@typescript-eslint/eslint-recommended", // Extends previous rules by rules from @typescript-eslint/eslint-plugin
+    "plugin:@typescript-eslint/recommended",
+    "prettier" // Extends previous rules by rules from @eslint-plugin-prettier
+  ],
+  "rules": {
+    "prettier/prettier": "error",
+    "no-underscore-dangle": "off",
+    "no-await-in-loop": "off",
+    "no-plusplus": "off",
+    "no-restricted-syntax": "off",
+    "class-methods-use-this": "off",
+    "@typescript-eslint/lines-between-class-members": "off",
+    "@typescript-eslint/no-var-requires": "off",
+    "@typescript-eslint/ban-ts-comment": "off",
+    "@typescript-eslint/ban-types": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "import/no-named-as-default": "off",
+    "import/no-named-as-default-member": "off",
+    "import/prefer-default-export": "off",
+    "linebreak-style": ["error", "unix"]
+  },
+  "ignorePatterns": ["./node_modules/**", "./src/**/*.cjs"]
+}

@@ -1,69 +1,71 @@
 <script lang="ts">
-	import { onMount, beforeUpdate } from 'svelte';
+  import { onMount } from 'svelte';
 
   import { clickOutside } from './clickOutside';
-  import { canvasModel } from '../Canvas/CanvasModel';
+  import { canvasModel, type ShapeConfig } from '../Canvas/CanvasModel';
   import { toolbarModel } from '../Toolbar/ToolbarModel';
   import { dndWatcher } from '../../model';
   import { MoveableModel } from './MoveableModel';
-  import Selection from '../Selection/Selection.svelte'
+  import Selection from '../Selection/Selection.svelte';
 
-  export let settings;
+  export let settings: ShapeConfig;
+
   const moveableModel = new MoveableModel(settings);
-
   const { config } = moveableModel;
+
   const deleteIcon = document.getElementById('toolbar');
-  let moveableRef;
+  let moveableRef: HTMLDivElement;
 
   $: styles = `
-    width: ${$config.width}px; 
-    height: ${$config.height}px;
-    transform: translate(${$config.x}px, ${$config.y}px);
+    width: ${$config?.width}px; 
+    height: ${$config?.height}px;
+    transform: translate(${$config?.x}px, ${$config?.y}px);
   `;
 
   const onClickOutside = () => {
     moveableModel.select(false);
     canvasModel.clearAllSelected();
     toolbarModel.disableDeleteTool(true);
-  }
+  };
 
   const onSelectShape = () => {
     moveableModel.select(true);
     canvasModel.selectShape(settings);
     toolbarModel.disableDeleteTool(false);
-  }
+  };
 
-	onMount(async () => {
+  onMount(async () => {
     const dnd = dndWatcher(moveableRef);
 
     const observeDndEvents = async () => {
       for await (const e of dnd) {
-        moveableModel.move(e)
+        moveableModel.move(e as MouseEvent);
       }
     };
 
     await Promise.all([observeDndEvents()]);
-	});
+  });
 </script>
 
 <div>
-  <div 
-    class="moveable" 
-    style={styles} 
+  <div
+    class="moveable"
+    style={styles}
     bind:this={moveableRef}
     use:clickOutside={{ exclude: [deleteIcon] }}
     on:click={onSelectShape}
     on:outclick={onClickOutside}
-    >
-    <slot></slot>
+    on:keydown
+  >
+    <slot />
   </div>
-  {#if $config.selected}
-    <Selection styles={styles} provider={moveableModel} />
+  {#if $config?.selected}
+    <Selection {styles} model={moveableModel} />
   {/if}
 </div>
 
 <style>
-	.moveable {
+  .moveable {
     position: absolute;
     top: 0;
     left: 0;
@@ -78,5 +80,5 @@
     font-size: 0.9em;
     color: rgb(0, 0, 0);
     border-radius: 0.2rem;
-	}
+  }
 </style>

@@ -1,20 +1,39 @@
 {
   "extends": "@tsconfig/svelte/tsconfig.json",
   "compilerOptions": {
-    "target": "ESNext",
+    "strict": true, // Enable all strict type checking options
+    "forceConsistentCasingInFileNames": true, // Disallow inconsistently-cased references to the same file.
+    "target": "ESNext", // Specify ECMAScript target version
     "useDefineForClassFields": true,
-    "module": "ESNext",
-    "resolveJsonModule": true,
+    "module": "ESNext", // Specify module code generation
+    "resolveJsonModule": true, // Include modules imported with .json extension
+    "experimentalDecorators": true, // Enables experimental support for ES decorators
+    "skipLibCheck": true, // Skip type checking of all declaration files
+    "esModuleInterop": true, // Disables namespace imports (import * as fs from "fs") and enables CJS/AMD/UMD style imports (import fs from "fs")
+    "allowSyntheticDefaultImports": true, // Allow default imports from modules with no default export
+    "moduleResolution": "node", // Resolve modules using Node.js style
+    "removeComments": true, // Disable emitting comments
+    "noEmit": true, // Do not emit output (meaning do not compile code, only perform type checking)
+    "sourceMap": true, // Generate corresponding .map file
+    "declaration": true, // Generate corresponding .d.ts file
+    "noUnusedLocals": true, // Report errors on unused locals
+    "noUnusedParameters": true, // Report errors on unused parameters
+    "noFallthroughCasesInSwitch": true, // Report errors for fallthrough cases in switch statement
     /**
      * Typecheck JS in `.svelte` and `.js` files by default.
      * Disable checkJs if you'd like to use dynamic types in JS.
      * Note that setting allowJs false does not prevent the use
      * of JS in `.svelte` files.
      */
-    "allowJs": true,
+    "allowJs": true, // Allow JavaScript files to be compiled
     "checkJs": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["src/*"]
+    }
   },
+  "types": ["src/app/app.d.ts"],
   "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.js", "src/**/*.svelte"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

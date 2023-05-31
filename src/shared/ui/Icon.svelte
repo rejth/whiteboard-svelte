@@ -1,14 +1,8 @@
 <script>
   export let src = '';
-  export let alt = "Icon";
+  export let alt = 'Icon';
 </script>
 
-<svelte:element 
-  this="img" 
-  src={src} 
-  class={$$props.class}
-  alt={alt} 
-  on:click
-/>
+<svelte:element this="img" {src} class={$$props.class} {alt} on:click on:keydown />
 
 <style></style>

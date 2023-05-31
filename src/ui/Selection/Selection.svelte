@@ -1,42 +1,32 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+  import { onMount } from 'svelte';
   import { resizeWatcher } from '../../model';
+  import type { MoveableModel } from '../Moveable/MoveableModel';
 
-  export let styles;
-  export let provider;
+  export let model: MoveableModel;
+  export let styles: string;
 
-  let selectionRef;
-  let cornerRef;
+  let selectionRef: HTMLSpanElement;
+  let cornerRef: HTMLSpanElement;
+  const cornerStyles = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
 
-  const cornerStyles = [
-    'top-left', 'top-right', 'bottom-left', 'bottom-right',
-  ];
-
-	onMount(async () => {
+  onMount(async () => {
     const resize = resizeWatcher(cornerRef);
 
     const observeResizeEvents = async () => {
       for await (const e of resize) {
         const rect = selectionRef.getBoundingClientRect();
-        provider.resize(e, rect)
+        model.resize(e as MouseEvent, rect);
       }
     };
 
     await Promise.all([observeResizeEvents()]);
-	});
+  });
 </script>
 
-<span 
-  class="selection"
-  id="selection"
-  style={styles}
-  bind:this={selectionRef}
->
+<span class="selection" id="selection" style={styles} bind:this={selectionRef}>
   {#each cornerStyles as corner}
-    <span 
-      class={`corner-resize-drag ${corner}`}
-      bind:this={cornerRef}>
-    </span>
+    <span class={`corner-resize-drag ${corner}`} bind:this={cornerRef} />
   {/each}
 </span>
 
@@ -48,7 +38,7 @@
     width: 9rem;
     height: 9rem;
 
-    border: 2px solid #35B2DC;
+    border: 2px solid #35b2dc;
     pointer-events: none;
   }
 
@@ -58,13 +48,13 @@
     width: 10px;
     height: 10px;
 
-    border: 1px solid #CCCCCC;
+    border: 1px solid #cccccc;
     border-radius: 20%;
     pointer-events: all;
     cursor: nwse-resize;
 
     box-shadow: 2px 2px 5px 0 rgb(0 0 0 / 16%);
-    background-color: #FFFF;
+    background-color: #ffff;
   }
 
   .corner-resize-drag.top-left {

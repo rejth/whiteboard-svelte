@@ -2,7 +2,7 @@ type Target = (Window & typeof globalThis) | Document | HTMLElement;
 
 export function on<E extends keyof HTMLElementEventMap>(
   target: Target,
-  eventType: E
+  eventType: E,
 ): AsyncIterableIterator<Event> {
   if (!target) throw new Error('There is no such event target in DOM');
 
@@ -13,11 +13,9 @@ export function on<E extends keyof HTMLElementEventMap>(
 
     async next(): Promise<IteratorResult<Event>> {
       return new Promise((resolve) => {
-        target.addEventListener(
-          eventType,
-          (event) => resolve({ done: false, value: event }),
-          { once: true }
-        );
+        target.addEventListener(eventType, (event) => resolve({ done: false, value: event }), {
+          once: true,
+        });
       });
     },
   };
@@ -25,7 +23,7 @@ export function on<E extends keyof HTMLElementEventMap>(
 
 export function once<E extends keyof HTMLElementEventMap>(
   target: Target,
-  eventType: E
+  eventType: E,
 ): AsyncIterableIterator<Event> {
   if (!target) throw new Error('There is no such event target in DOM');
   let isEventFired = false;
@@ -48,7 +46,7 @@ export function once<E extends keyof HTMLElementEventMap>(
             isEventFired = true;
             resolve({ done: false, value: event });
           },
-          { once: true }
+          { once: true },
         );
       });
     },
