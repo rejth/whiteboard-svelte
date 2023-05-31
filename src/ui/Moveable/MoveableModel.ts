@@ -12,8 +12,8 @@ export class MoveableModel {
   move(e: MouseEvent): void {
     this.config.update((value) => ({
       ...(value as ShapeConfig),
-      x: value?.x || 0 + e.movementX,
-      y: value?.y || 0 + e.movementY,
+      x: Number(value?.x) + e.movementX,
+      y: Number(value?.y) + e.movementY,
     }));
   }
 
