@@ -1,5 +1,5 @@
-import { on, once } from '../lib/listeners';
-import { filter, any, every, sequence, watch, onlyEvent } from '../lib/utils';
+import { on, once } from './listeners';
+import { filter, any, every, sequence, watch, onlyEvent } from './utils';
 
 export function dndWatcher<T>(target: HTMLElement): AsyncGenerator<T> {
   return watch(() =>

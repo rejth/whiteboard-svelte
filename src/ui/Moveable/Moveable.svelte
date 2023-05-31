@@ -1,12 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte';
 
-  import { clickOutside } from './clickOutside';
-  import { canvasModel, type ShapeConfig } from '../Canvas/CanvasModel';
-  import { toolbarModel } from '../Toolbar/ToolbarModel';
-  import { dndWatcher } from '../../model';
+  import { clickOutside, dndWatcher } from '~/shared/lib';
+  import { canvasModel, type ShapeConfig } from '~/ui/Canvas';
+  import { toolbarModel } from '~/ui/Toolbar';
+  import { Selection } from '~/ui/Selection';
+
   import { MoveableModel } from './MoveableModel';
-  import Selection from '../Selection/Selection.svelte';
 
   export let settings: ShapeConfig;
 
@@ -17,7 +17,7 @@
   let moveableRef: HTMLDivElement;
 
   $: styles = `
-    width: ${$config?.width}px; 
+    width: ${$config?.width}px;
     height: ${$config?.height}px;
     transform: translate(${$config?.x}px, ${$config?.y}px);
   `;

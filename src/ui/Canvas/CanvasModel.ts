@@ -1,6 +1,7 @@
 import { get, type Writable, writable } from 'svelte/store';
 import { v4 } from 'uuid';
-import { type ShapeType, toolbarModel, Tools } from '../Toolbar/ToolbarModel';
+
+import { type ShapeType, toolbarModel, Tools } from '../Toolbar';
 
 export type ShapeConfig = {
   uuid: string;

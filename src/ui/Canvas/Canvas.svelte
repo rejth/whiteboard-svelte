@@ -1,13 +1,13 @@
 <script lang="ts">
   import type { ComponentType } from 'svelte';
 
-  import { Moveable } from '..';
-  import Note from '../Note/Note.svelte';
-  import Text from '../Text/Text.svelte';
-  import Area from '../Area/Area.svelte';
+  import { Tools, type ShapeType } from '~/ui/Toolbar';
+  import { Moveable } from '~/ui/Moveable';
+  import { Note } from '~/ui/Note';
+  import { Text } from '~/ui/Text';
+  import { Area } from '~/ui/Area';
 
   import { canvasModel } from './CanvasModel';
-  import { Tools, type ShapeType } from '../Toolbar/ToolbarModel';
 
   let x = 0;
   let y = 0;

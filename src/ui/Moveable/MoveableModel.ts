@@ -1,5 +1,5 @@
 import { type Writable, writable } from 'svelte/store';
-import { type ShapeConfig } from '../Canvas/CanvasModel';
+import { type ShapeConfig } from '../Canvas';
 
 export class MoveableModel {
   config: Writable<ShapeConfig | null> = writable(null);

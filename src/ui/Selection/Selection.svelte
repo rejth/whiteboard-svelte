@@ -1,7 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { resizeWatcher } from '../../model';
-  import type { MoveableModel } from '../Moveable/MoveableModel';
+
+  import { resizeWatcher } from '~/shared/lib';
+  import type { MoveableModel } from '~/ui/Moveable';
 
   export let model: MoveableModel;
   export let styles: string;

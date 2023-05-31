@@ -1,5 +1,4 @@
-import './styles/reset.css';
-import './styles/index.css';
+import './index.scss';
 import App from './App.svelte';
 
 export { App };

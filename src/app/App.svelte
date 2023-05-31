@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { Toolbar, Canvas } from '../ui';
-  import './App.css';
+  import { Canvas } from '~/ui/Canvas';
+  import { Toolbar } from '~/ui/Toolbar';
+  import './App.scss';
 </script>
 
 <div class="board" role="button" tabindex="0">
