@@ -1,18 +1,16 @@
 <script lang="ts">
-  import type { ComponentType } from 'svelte';
+  import { type ComponentType, onMount } from 'svelte';
 
+  import { dndWatcher } from '~/shared/lib';
   import { Tools, type ShapeType } from '~/ui/Toolbar';
   import { Moveable } from '~/ui/Moveable';
   import { Note } from '~/ui/Note';
   import { Text } from '~/ui/Text';
   import { Area } from '~/ui/Area';
-
   import { canvasModel } from './CanvasModel';
 
-  let x = 0;
-  let y = 0;
   let canvasRef: HTMLDivElement;
-  const { shapes } = canvasModel;
+  const { shapes, selectedShapes, mousePosition } = canvasModel;
 
   const widgets: Record<ShapeType, ComponentType> = {
     [Tools.NOTE]: Note,
@@ -21,10 +19,22 @@
   };
 
   $: styles = `
-    transform: translate(${x}px, ${y}px);
+    transform: translate(${$mousePosition.x}px, ${$mousePosition.y}px);
   `;
 
-  const handleClick = (e: MouseEvent) => {
+  onMount(async () => {
+    const dnd = dndWatcher(canvasRef);
+
+    for await (const e of dnd) {
+      const event = e as MouseEvent;
+      const target = event.target as HTMLElement;
+      if (target.isEqualNode(canvasRef) && $selectedShapes.size === 0) {
+        canvasModel.dragOverCanvas(event);
+      }
+    }
+  });
+
+  const onClick = (e: MouseEvent) => {
     canvasModel.addShape(e, canvasRef.getBoundingClientRect());
   };
 </script>
@@ -38,7 +48,7 @@
     tabIndex={0}
     style={styles}
     bind:this={canvasRef}
-    on:click={handleClick}
+    on:click={onClick}
     on:keydown
   >
     {#each [...$shapes] as shape (shape.uuid)}

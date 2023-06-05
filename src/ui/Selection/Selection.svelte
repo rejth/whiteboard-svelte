@@ -14,14 +14,10 @@
   onMount(async () => {
     const resize = resizeWatcher(cornerRef);
 
-    const observeResizeEvents = async () => {
-      for await (const e of resize) {
-        const rect = selectionRef.getBoundingClientRect();
-        model.resize(e as MouseEvent, rect);
-      }
-    };
-
-    await Promise.all([observeResizeEvents()]);
+    for await (const e of resize) {
+      const rect = selectionRef.getBoundingClientRect();
+      model.resize(e as MouseEvent, rect);
+    }
   });
 </script>
 

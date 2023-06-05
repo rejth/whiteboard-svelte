@@ -45,7 +45,7 @@
     },
   ];
 
-  const handleClick = (type: Tool) => {
+  const onClick = (type: Tool) => {
     if (type === Tools.DELETE) {
       canvasModel.deleteShape();
       return;
@@ -64,7 +64,7 @@
           class:disabled={options?.disabled}
           title={hoverText}
         >
-          <Icon src={icon} alt={label} on:click={() => handleClick(type)} />
+          <Icon src={icon} alt={label} on:click={() => onClick(type)} />
         </span>
         <span class="text">{label}</span>
       </span>

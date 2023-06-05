@@ -1,10 +1,10 @@
-interface ClickOutsideOptions {
+interface ClickInsideOptions {
   enabled?: boolean;
   exclude?: (HTMLElement | null)[];
   handler?: (...arg: any[]) => void;
 }
 
-export function clickOutside(node: HTMLElement, options: ClickOutsideOptions) {
+export function clickInside(node: HTMLElement, options: ClickInsideOptions) {
   const { exclude = [] } = options;
 
   const handleClick = (event: Event): void => {
@@ -14,16 +14,16 @@ export function clickOutside(node: HTMLElement, options: ClickOutsideOptions) {
       return;
     }
 
-    if (!node.contains(target) && !event.defaultPrevented) {
-      node.dispatchEvent(new CustomEvent('outclick'));
+    if (node.contains(target) && !event.defaultPrevented) {
+      node.dispatchEvent(new CustomEvent('insideclick'));
     }
   };
 
-  document.addEventListener('mousedown', handleClick, true);
+  node.addEventListener('mousedown', handleClick, true);
 
   return {
     destroy() {
-      document.removeEventListener('mouseup', handleClick, true);
+      node.removeEventListener('mouseup', handleClick, true);
     },
   };
 }

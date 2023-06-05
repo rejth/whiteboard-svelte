@@ -5,7 +5,6 @@
   import { canvasModel, type ShapeConfig } from '~/ui/Canvas';
   import { toolbarModel } from '~/ui/Toolbar';
   import { Selection } from '~/ui/Selection';
-
   import { MoveableModel } from './MoveableModel';
 
   export let settings: ShapeConfig;
@@ -22,41 +21,35 @@
     transform: translate(${$config?.x}px, ${$config?.y}px);
   `;
 
+  onMount(async () => {
+    const dnd = dndWatcher(moveableRef);
+
+    for await (const e of dnd) {
+      moveableModel.move(e as MouseEvent);
+    }
+  });
+
   const onClickOutside = () => {
     moveableModel.select(false);
-    canvasModel.clearAllSelected();
+    canvasModel.clearAllSelectedShapes();
     toolbarModel.disableDeleteTool(true);
   };
 
-  const onSelectShape = () => {
+  const onSelect = () => {
     moveableModel.select(true);
     canvasModel.selectShape(settings);
     toolbarModel.disableDeleteTool(false);
   };
-
-  onMount(async () => {
-    const dnd = dndWatcher(moveableRef);
-
-    const observeDndEvents = async () => {
-      for await (const e of dnd) {
-        moveableModel.move(e as MouseEvent);
-      }
-    };
-
-    await Promise.all([observeDndEvents()]);
-  });
 </script>
 
-<div>
-  <div
-    class="moveable"
-    style={styles}
-    bind:this={moveableRef}
-    use:clickOutside={{ exclude: [deleteIcon] }}
-    on:click={onSelectShape}
-    on:outclick={onClickOutside}
-    on:keydown
-  >
+<div
+  class="moveable-wrapper"
+  use:clickOutside={{ exclude: [deleteIcon] }}
+  on:mousedown={onSelect}
+  on:outclick={onClickOutside}
+  on:keydown
+>
+  <div class="moveable" style={styles} bind:this={moveableRef}>
     <slot />
   </div>
   {#if $config?.selected}
