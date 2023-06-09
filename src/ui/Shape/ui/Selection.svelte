@@ -2,9 +2,10 @@
   import { onMount } from 'svelte';
 
   import { resizeWatcher } from '~/shared/lib';
-  import type { MoveableModel } from '~/ui/Moveable';
 
-  export let model: MoveableModel;
+  import { type ShapeModel } from '../model';
+
+  export let model: ShapeModel;
   export let styles: string;
 
   let selectionRef: HTMLSpanElement;

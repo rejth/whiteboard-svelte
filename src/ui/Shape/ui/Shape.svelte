@@ -2,18 +2,20 @@
   import { onMount } from 'svelte';
 
   import { clickOutside, dndWatcher } from '~/shared/lib';
+
   import { canvasModel, type ShapeConfig } from '~/ui/Canvas';
   import { toolbarModel } from '~/ui/Toolbar';
-  import { Selection } from '~/ui/Selection';
-  import { MoveableModel } from './MoveableModel';
+
+  import { Selection } from './';
+  import { ShapeModel } from '../model';
 
   export let settings: ShapeConfig;
 
-  const moveableModel = new MoveableModel(settings);
-  const { config } = moveableModel;
+  const shapeModel = new ShapeModel(settings);
+  const { config } = shapeModel;
 
   const deleteIcon = document.getElementById('toolbar');
-  let moveableRef: HTMLDivElement;
+  let shapeRef: HTMLDivElement;
 
   $: styles = `
     width: ${$config?.width}px;
@@ -22,43 +24,43 @@
   `;
 
   onMount(async () => {
-    const dnd = dndWatcher(moveableRef);
+    const dnd = dndWatcher(shapeRef);
 
     for await (const e of dnd) {
-      moveableModel.move(e as MouseEvent);
+      shapeModel.move(e as MouseEvent);
     }
   });
 
   const onClickOutside = () => {
-    moveableModel.select(false);
+    shapeModel.select(false);
     canvasModel.clearAllSelectedShapes();
     toolbarModel.disableDeleteTool(true);
   };
 
   const onSelect = () => {
-    moveableModel.select(true);
+    shapeModel.select(true);
     canvasModel.selectShape(settings);
     toolbarModel.disableDeleteTool(false);
   };
 </script>
 
 <div
-  class="moveable-wrapper"
+  class="shape-wrapper"
   use:clickOutside={{ exclude: [deleteIcon] }}
   on:mousedown={onSelect}
   on:outclick={onClickOutside}
   on:keydown
 >
-  <div class="moveable" style={styles} bind:this={moveableRef}>
+  <div class="shape" style={styles} bind:this={shapeRef}>
     <slot />
   </div>
   {#if $config?.selected}
-    <Selection {styles} model={moveableModel} />
+    <Selection {styles} model={shapeModel} />
   {/if}
 </div>
 
 <style>
-  .moveable {
+  .shape {
     position: absolute;
     top: 0;
     left: 0;

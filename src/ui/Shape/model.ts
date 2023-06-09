@@ -1,7 +1,7 @@
 import { type Writable, writable } from 'svelte/store';
 import { type ShapeConfig } from '../Canvas';
 
-export class MoveableModel {
+export class ShapeModel {
   config: Writable<ShapeConfig | null> = writable(null);
   #ROUND = 2;
 

@@ -1,13 +1,14 @@
 <script lang="ts">
   import { Icon } from '~/shared/ui';
-  import { canvasModel } from '~/ui/Canvas';
-  import { toolbarModel, Tools, type Tool } from '~/ui/Toolbar';
+  import noteIcon from '~/shared/assets/note.svg';
+  import textIcon from '~/shared/assets/text.svg';
+  import areaIcon from '~/shared/assets/area.svg';
+  import panIcon from '~/shared/assets/pan.svg';
+  import trashIcon from '~/shared/assets/trash.svg';
 
-  import noteIcon from './assets/note.svg';
-  import textIcon from './assets/text.svg';
-  import areaIcon from './assets/area.svg';
-  import panIcon from './assets/pan.svg';
-  import trashIcon from './assets/trash.svg';
+  import { canvasModel } from '~/ui/Canvas';
+
+  import { toolbarModel, Tools, type Tool } from '.';
 
   const { tool, disableDeletion } = toolbarModel;
 

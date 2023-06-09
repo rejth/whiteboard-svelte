@@ -2,12 +2,12 @@
   import { type ComponentType, onMount } from 'svelte';
 
   import { dndWatcher } from '~/shared/lib';
+
+  import { Drawing } from '~/ui/Drawing';
   import { Tools, type ShapeType } from '~/ui/Toolbar';
-  import { Moveable } from '~/ui/Moveable';
-  import { Note } from '~/ui/Note';
-  import { Text } from '~/ui/Text';
-  import { Area } from '~/ui/Area';
-  import { canvasModel } from './CanvasModel';
+  import { Shape, Note, Text, Area } from '~/ui/Shape';
+
+  import { canvasModel } from './model';
 
   let canvasRef: HTMLDivElement;
   const { shapes, selectedShapes, mousePosition } = canvasModel;
@@ -52,10 +52,11 @@
     on:keydown
   >
     {#each [...$shapes] as shape (shape.uuid)}
-      <Moveable settings={shape}>
+      <Shape settings={shape}>
         <svelte:component this={widgets[shape.type]} />
-      </Moveable>
+      </Shape>
     {/each}
+    <Drawing />
   </div>
 </div>
 
