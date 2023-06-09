@@ -1,28 +1,32 @@
 import { type Writable, writable } from 'svelte/store';
 
 export type Tool = keyof typeof Tools;
-export type ShapeType = Exclude<Tool, 'SELECT' | 'PAN' | 'DELETE'>;
+export type ShapeType = 'NOTE' | 'TEXT' | 'AREA';
+export type DrawingTool = 'SELECT' | 'CONNECT' | 'PEN';
+export type ServiceTool = 'PAN' | 'DELETE';
 export enum Tools {
   NOTE = 'NOTE',
   TEXT = 'TEXT',
   AREA = 'AREA',
-  PAN = 'PAN',
+  PEN = 'PEN',
   SELECT = 'SELECT',
+  CONNECT = 'CONNECT',
+  PAN = 'PAN',
   DELETE = 'DELETE',
 }
 
 class ToolbarModel {
   tool: Writable<Tool> = writable('PAN');
-  shapeTool: Writable<ShapeType | null> = writable(null);
+  shapeType: Writable<ShapeType | null> = writable(null);
   disableDeletion: Writable<boolean> = writable(true);
 
   changeTool(tool: Tool): void {
     this.tool.set(tool);
 
     if (['NOTE', 'TEXT', 'AREA'].includes(tool)) {
-      this.shapeTool.set(tool as ShapeType);
+      this.shapeType.set(tool as ShapeType);
     } else {
-      this.shapeTool.set(null);
+      this.shapeType.set(null);
     }
   }
 

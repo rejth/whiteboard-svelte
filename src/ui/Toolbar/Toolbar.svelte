@@ -4,8 +4,9 @@
   import textIcon from '~/shared/assets/text.svg';
   import areaIcon from '~/shared/assets/area.svg';
   import panIcon from '~/shared/assets/pan.svg';
+  import selectIcon from '~/shared/assets/select.svg';
+  import connectIcon from '~/shared/assets/connect.svg';
   import trashIcon from '~/shared/assets/trash.svg';
-
   import { canvasModel } from '~/ui/Canvas';
 
   import { toolbarModel, Tools, type Tool } from '.';
@@ -20,22 +21,34 @@
       hoverText: 'Drag to add new text note',
     },
     {
-      label: 'Text',
-      type: Tools.TEXT,
-      icon: textIcon,
-      hoverText: 'Drag to add new text area',
-    },
-    {
       label: 'Area',
       type: Tools.AREA,
       icon: areaIcon,
       hoverText: 'Drag to add new area for organizing items',
     },
     {
+      label: 'Text',
+      type: Tools.TEXT,
+      icon: textIcon,
+      hoverText: 'Drag to add new text area',
+    },
+    {
+      label: 'Select',
+      type: Tools.SELECT,
+      icon: selectIcon,
+      hoverText: 'Select tool',
+    },
+    {
       label: 'Pan',
       type: Tools.PAN,
       icon: panIcon,
       hoverText: 'Pan tool',
+    },
+    {
+      label: 'Connect',
+      type: Tools.CONNECT,
+      icon: connectIcon,
+      hoverText: 'Connect tool',
     },
     {
       label: 'Delete',

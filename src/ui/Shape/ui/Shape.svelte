@@ -2,7 +2,6 @@
   import { onMount } from 'svelte';
 
   import { clickOutside, dndWatcher } from '~/shared/lib';
-
   import { canvasModel, type ShapeConfig } from '~/ui/Canvas';
   import { toolbarModel } from '~/ui/Toolbar';
 

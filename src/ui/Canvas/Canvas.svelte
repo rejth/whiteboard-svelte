@@ -2,7 +2,6 @@
   import { type ComponentType, onMount } from 'svelte';
 
   import { dndWatcher } from '~/shared/lib';
-
   import { Drawing } from '~/ui/Drawing';
   import { Tools, type ShapeType } from '~/ui/Toolbar';
   import { Shape, Note, Text, Area } from '~/ui/Shape';

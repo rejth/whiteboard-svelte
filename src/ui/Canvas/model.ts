@@ -23,14 +23,15 @@ const dimensions: Record<ShapeType, { width: number; height: number }> = {
 };
 
 class CanvasModel {
-  shapeTool: ShapeType | null = null;
   shapes: Writable<Set<ShapeConfig>> = writable(new Set());
   selectedShapes: Writable<Set<ShapeConfig>> = writable(new Set());
   mousePosition: Writable<{ x: number; y: number }> = writable({ x: 0, y: 0 });
 
+  shapeType: ShapeType | null = null;
+
   constructor() {
-    toolbarModel.shapeTool.subscribe((value) => {
-      this.shapeTool = value;
+    toolbarModel.shapeType.subscribe((value) => {
+      this.shapeType = value;
     });
   }
 
@@ -72,15 +73,15 @@ class CanvasModel {
   }
 
   addShape(e: MouseEvent, canvasRect: DOMRect): void {
-    if (!this.shapeTool) return;
+    if (!this.shapeType) return;
     const position = this.#getMousePosition(e, canvasRect);
-    const shape = this.#createShape(v4(), this.shapeTool, position);
+    const shape = this.#createShape(v4(), this.shapeType, position);
 
     this.shapes.update((shapes) => shapes.add(shape));
     this.selectShape(shape);
 
     toolbarModel.tool.set(Tools.PAN);
-    toolbarModel.shapeTool.set(null);
+    toolbarModel.shapeType.set(null);
     toolbarModel.disableDeletion.set(false);
   }
 
