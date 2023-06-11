@@ -6,6 +6,7 @@
   import panIcon from '~/shared/assets/pan.svg';
   import selectIcon from '~/shared/assets/select.svg';
   import connectIcon from '~/shared/assets/connect.svg';
+  import penIcon from '~/shared/assets/pen.svg';
   import trashIcon from '~/shared/assets/trash.svg';
   import { canvasModel } from '~/ui/Canvas';
 
@@ -45,6 +46,12 @@
       hoverText: 'Pan tool',
     },
     {
+      label: 'Pen',
+      type: Tools.PEN,
+      icon: penIcon,
+      hoverText: 'Pen tool',
+    },
+    {
       label: 'Connect',
       type: Tools.CONNECT,
       icon: connectIcon,
@@ -60,10 +67,7 @@
   ];
 
   const onClick = (type: Tool) => {
-    if (type === Tools.DELETE) {
-      canvasModel.deleteShape();
-      return;
-    }
+    if (type === Tools.DELETE) return canvasModel.deleteShape();
     toolbarModel.changeTool(type);
   };
 </script>

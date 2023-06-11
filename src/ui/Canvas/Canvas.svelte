@@ -3,13 +3,15 @@
 
   import { dndWatcher } from '~/shared/lib';
   import { Drawing } from '~/ui/Drawing';
-  import { Tools, type ShapeType } from '~/ui/Toolbar';
+  import { Tools, type ShapeType, toolbarModel } from '~/ui/Toolbar';
   import { Shape, Note, Text, Area } from '~/ui/Shape';
 
   import { canvasModel } from './model';
+  import { isDrawingToolSelected } from '../Toolbar/lib';
 
   let canvasRef: HTMLDivElement;
-  const { shapes, selectedShapes, mousePosition } = canvasModel;
+  const { shapes, mousePosition } = canvasModel;
+  const { tool } = toolbarModel;
 
   const widgets: Record<ShapeType, ComponentType> = {
     [Tools.NOTE]: Note,
@@ -19,6 +21,7 @@
 
   $: styles = `
     transform: translate(${$mousePosition.x}px, ${$mousePosition.y}px);
+    cursor: ${isDrawingToolSelected($tool) ? 'default' : 'grab'};
   `;
 
   onMount(async () => {
@@ -27,9 +30,7 @@
     for await (const e of dnd) {
       const event = e as MouseEvent;
       const target = event.target as HTMLElement;
-      if (target.isEqualNode(canvasRef) && $selectedShapes.size === 0) {
-        canvasModel.dragOverCanvas(event);
-      }
+      canvasModel.dragOverCanvas(event, target.isEqualNode(canvasRef));
     }
   });
 
@@ -75,7 +76,6 @@
     width: 100%;
     height: 100%;
     pointer-events: all;
-    cursor: grab;
 
     background-color: #f2f2f3;
     background-position: 0 0, 30em 30em;

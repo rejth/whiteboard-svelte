@@ -1,11 +1,11 @@
 <script lang="ts">
-  export const path: { x: number; y: number }[] = [];
+  export let path: { x: number; y: number }[];
 
-  const curve = [`M ${path[0].x} ${path[0].y}`];
-  const collector = path.map((point) => `L ${point.x} ${point.y}`);
+  $: curve = [`M ${path[0].x} ${path[0].y}`];
+  $: collector = path.map((point) => `L ${point.x} ${point.y}`);
 </script>
 
-<rect class="figure-pen" d={curve.concat(collector).join(' ')} />
+<path class="figure-pen" d={curve.concat(collector).join(' ')} />
 
 <style>
   .figure-pen {

@@ -1,7 +1,7 @@
 <script lang="ts">
-  export const path: { x: number; y: number }[] = [];
+  export let path: { x: number; y: number }[];
 
-  const rect = {
+  $: rect = {
     x: path[0].x,
     y: path[0].y,
     width: path[path.length - 1].x - path[0].x,

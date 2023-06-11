@@ -1,7 +1,7 @@
 <script lang="ts">
-  export const path: { x: number; y: number }[] = [];
+  export let path: { x: number; y: number }[];
 
-  const curve = [
+  $: curve = [
     `M ${path[0].x} ${path[0].y}`,
     `L ${path[path.length - 1].x} ${path[path.length - 1].y}`,
   ];

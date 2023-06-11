@@ -1,4 +1,4 @@
-type Target = (Window & typeof globalThis) | Document | HTMLElement;
+export type Target = (Window & typeof globalThis) | Document | HTMLElement;
 
 export function on<E extends keyof HTMLElementEventMap>(
   target: Target,

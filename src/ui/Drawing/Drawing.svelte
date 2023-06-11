@@ -1,14 +1,13 @@
 <script lang="ts">
-  import { onMount, type ComponentType } from 'svelte';
+  import { type ComponentType } from 'svelte';
 
-  import { dndWatcher as mouseWatcher } from '~/shared/lib';
-  import { Figure, Line, Pen, Rect } from '~/ui/Figure';
+  import { Line, Pen, Rect } from '~/ui/Figure';
 
   import { drawingModel } from './model';
   import { Tools, type DrawingTool } from '../Toolbar';
 
-  let svgRef: HTMLDivElement;
-  const { figures } = drawingModel;
+  let svgRef: SVGSVGElement;
+  const { figures, mouse } = drawingModel;
 
   const widgets: Record<DrawingTool, ComponentType> = {
     [Tools.CONNECT]: Line,
@@ -16,29 +15,27 @@
     [Tools.PEN]: Pen,
   };
 
-  onMount(async () => {
-    const mouse = mouseWatcher(svgRef);
+  const renderWidget = (type: DrawingTool | null) => widgets[type || Tools.CONNECT];
 
-    for await (const e of mouse) {
-      drawingModel.draw(e as MouseEvent);
-    }
-  });
-
-  const onClick = (_e: MouseEvent) => {};
+  const onMouseDown = (e: MouseEvent) => drawingModel.startPath(e, svgRef.getBoundingClientRect());
+  const onMouseMove = (e: MouseEvent) => drawingModel.movePath(e, svgRef.getBoundingClientRect());
+  const onMouseUp = () => drawingModel.endPath();
 </script>
 
-<div class="drawing-wrapper" bind:this={svgRef}>
-  <svg class="drawing" on:click={onClick} on:keydown>
-    {#each [...$figures] as item (item.uuid)}
-      <Figure settings={item}>
-        <svelte:component this={widgets[item.type]} />
-      </Figure>
-    {/each}
-  </svg>
-</div>
+<svelte:document on:mousedown={onMouseDown} on:mousemove={onMouseMove} on:mouseup={onMouseUp} />
+
+<svg class="drawing" bind:this={svgRef}>
+  {#each [...$figures] as { uuid, type, path } (uuid)}
+    <svelte:component this={renderWidget(type)} {path} />
+  {/each}
+
+  {#if $mouse}
+    <svelte:component this={renderWidget($mouse.type)} path={$mouse.path} />
+  {/if}
+</svg>
 
 <style>
-  .drawing-wrapper {
+  .drawing {
     width: 800em;
     height: 600em;
     position: absolute;
@@ -46,10 +43,5 @@
     left: 0px;
     pointer-events: none;
     z-index: 200000000;
-  }
-
-  .drawing {
-    width: 100%;
-    height: 100%;
   }
 </style>

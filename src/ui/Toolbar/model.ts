@@ -1,4 +1,5 @@
 import { type Writable, writable } from 'svelte/store';
+import { isDrawingToolSelected, isShapeToolSelected } from './lib';
 
 export type Tool = keyof typeof Tools;
 export type ShapeType = 'NOTE' | 'TEXT' | 'AREA';
@@ -18,16 +19,29 @@ export enum Tools {
 class ToolbarModel {
   tool: Writable<Tool> = writable('PAN');
   shapeType: Writable<ShapeType | null> = writable(null);
+  drawingTool: Writable<DrawingTool | null> = writable(null);
   disableDeletion: Writable<boolean> = writable(true);
 
-  changeTool(tool: Tool): void {
-    this.tool.set(tool);
-
-    if (['NOTE', 'TEXT', 'AREA'].includes(tool)) {
+  setShapeType(tool: Tool): void {
+    if (isShapeToolSelected(tool)) {
       this.shapeType.set(tool as ShapeType);
     } else {
       this.shapeType.set(null);
     }
+  }
+
+  setDrawingTool(tool: Tool): void {
+    if (isDrawingToolSelected(tool)) {
+      this.drawingTool.set(tool as DrawingTool);
+    } else {
+      this.drawingTool.set(null);
+    }
+  }
+
+  changeTool(tool: Tool): void {
+    this.tool.set(tool);
+    this.setShapeType(tool);
+    this.setDrawingTool(tool);
   }
 
   disableDeleteTool(disabled: boolean): void {

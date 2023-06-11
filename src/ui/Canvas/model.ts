@@ -1,7 +1,8 @@
 import { get, type Writable, writable } from 'svelte/store';
 import { v4 } from 'uuid';
 
-import { type ShapeType, toolbarModel, Tools } from '../Toolbar';
+import { type ShapeType, toolbarModel, Tools, type Tool } from '../Toolbar';
+import { isDrawingToolSelected } from '../Toolbar/lib';
 
 export type ShapeConfig = {
   uuid: string;
@@ -28,10 +29,14 @@ class CanvasModel {
   mousePosition: Writable<{ x: number; y: number }> = writable({ x: 0, y: 0 });
 
   shapeType: ShapeType | null = null;
+  tool: Tool = Tools.PAN;
 
   constructor() {
     toolbarModel.shapeType.subscribe((value) => {
       this.shapeType = value;
+    });
+    toolbarModel.tool.subscribe((value) => {
+      this.tool = value;
     });
   }
 
@@ -65,11 +70,15 @@ class CanvasModel {
     };
   }
 
-  dragOverCanvas(e: MouseEvent): void {
-    this.mousePosition.update((value) => ({
-      x: value.x + e.movementX,
-      y: value.y + e.movementY,
-    }));
+  dragOverCanvas(e: MouseEvent, insideRect: boolean): void {
+    const selected = get(this.selectedShapes);
+
+    if (insideRect && selected.size === 0 && !isDrawingToolSelected(this.tool)) {
+      this.mousePosition.update((value) => ({
+        x: value.x + e.movementX,
+        y: value.y + e.movementY,
+      }));
+    }
   }
 
   addShape(e: MouseEvent, canvasRect: DOMRect): void {
