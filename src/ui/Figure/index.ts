@@ -1,2 +1,2 @@
-export { Line, Pen, Rect } from './ui';
+export { Line, Pen, Rect, Grabber } from './ui';
 export * from './model';

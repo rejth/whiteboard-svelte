@@ -5,7 +5,9 @@
   $: collector = path.map((point) => `L ${point.x} ${point.y}`);
 </script>
 
-<path class="figure-pen" d={curve.concat(collector).join(' ')} />
+<g>
+  <path class="figure-pen" d={curve.concat(collector).join(' ')} />
+</g>
 
 <style>
   .figure-pen {

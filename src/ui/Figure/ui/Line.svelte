@@ -7,7 +7,9 @@
   ];
 </script>
 
-<path class="figure-line" d={curve.join(' ')} />
+<g>
+  <path class="figure-line" d={curve.join(' ')} />
+</g>
 
 <style>
   .figure-line {

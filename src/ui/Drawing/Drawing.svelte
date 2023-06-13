@@ -5,9 +5,10 @@
 
   import { drawingModel } from './model';
   import { Tools, type DrawingTool } from '../Toolbar';
+  import { Grabber } from '../Figure';
 
   let svgRef: SVGSVGElement;
-  const { figures, mouse } = drawingModel;
+  const { figures, grabbers, mouse } = drawingModel;
 
   const widgets: Record<DrawingTool, ComponentType> = {
     [Tools.CONNECT]: Line,
@@ -24,15 +25,27 @@
 
 <svelte:document on:mousedown={onMouseDown} on:mousemove={onMouseMove} on:mouseup={onMouseUp} />
 
-<svg class="drawing" bind:this={svgRef}>
-  {#each [...$figures] as { uuid, type, path } (uuid)}
-    <svelte:component this={renderWidget(type)} {path} />
+<div>
+  {#each [...$grabbers.values()] as node (node.uuid)}
+    <Grabber {node} />
   {/each}
 
-  {#if $mouse}
-    <svelte:component this={renderWidget($mouse.type)} path={$mouse.path} />
+  {#if $mouse && $mouse.grabbers}
+    {#each [...$mouse.grabbers.values()] as node (node.uuid)}
+      <Grabber {node} />
+    {/each}
   {/if}
-</svg>
+
+  <svg class="drawing" bind:this={svgRef}>
+    {#each [...$figures] as { uuid, type, path } (uuid)}
+      <svelte:component this={renderWidget(type)} {path} />
+    {/each}
+
+    {#if $mouse}
+      <svelte:component this={renderWidget($mouse.type)} path={$mouse.path} />
+    {/if}
+  </svg>
+</div>
 
 <style>
   .drawing {
