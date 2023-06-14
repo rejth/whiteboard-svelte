@@ -3,6 +3,7 @@ import { v4 } from 'uuid';
 
 import { type ShapeType, toolbarModel, Tools, type Tool } from '../Toolbar';
 import { isDrawingToolSelected } from '../Toolbar/lib';
+import { GeometryManager, type Dimension, type Point } from '../../shared/services';
 
 export type ShapeConfig = {
   uuid: string;
@@ -17,7 +18,7 @@ export type ShapeConfig = {
   text?: string;
 };
 
-const dimensions: Record<ShapeType, { width: number; height: number }> = {
+const dimensions: Record<ShapeType, Dimension> = {
   NOTE: { width: 140, height: 140 },
   AREA: { width: 240, height: 240 },
   TEXT: { width: 90, height: 30 },
@@ -28,10 +29,13 @@ class CanvasModel {
   selectedShapes: Writable<Set<ShapeConfig>> = writable(new Set());
   mousePosition: Writable<{ x: number; y: number }> = writable({ x: 0, y: 0 });
 
+  #geometryManager: GeometryManager;
   shapeType: ShapeType | null = null;
   tool: Tool = Tools.PAN;
 
   constructor() {
+    this.#geometryManager = new GeometryManager();
+
     toolbarModel.shapeType.subscribe((value) => {
       this.shapeType = value;
     });
@@ -40,11 +44,11 @@ class CanvasModel {
     });
   }
 
-  #createShape(uuid: string, type: ShapeType, { x, y }: Pick<ShapeConfig, 'x' | 'y'>): ShapeConfig {
+  #createShape(uuid: string, type: ShapeType, point: Point): ShapeConfig {
     const styles = `
       width: ${dimensions[type].width}em;
       height: ${dimensions[type].height}em;
-      transform: translate(${x}px, ${y}px);
+      transform: translate(${point.x}px, ${point.y}px);
     `;
 
     return {
@@ -53,9 +57,9 @@ class CanvasModel {
       selected: true,
       width: dimensions[type].width,
       height: dimensions[type].height,
+      x: point.x,
+      y: point.y,
       styles,
-      x,
-      y,
     };
   }
 
@@ -63,27 +67,17 @@ class CanvasModel {
     return new Set([...store].filter((el) => !selected.has(el)));
   }
 
-  #getMousePosition(e: MouseEvent, rect: DOMRect) {
-    return {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    };
-  }
-
   dragOverCanvas(e: MouseEvent, insideRect: boolean): void {
     const selected = get(this.selectedShapes);
 
     if (insideRect && selected.size === 0 && !isDrawingToolSelected(this.tool)) {
-      this.mousePosition.update((value) => ({
-        x: value.x + e.movementX,
-        y: value.y + e.movementY,
-      }));
+      this.mousePosition.update((point) => this.#geometryManager.move(e, point));
     }
   }
 
   addShape(e: MouseEvent, canvasRect: DOMRect): void {
     if (!this.shapeType) return;
-    const position = this.#getMousePosition(e, canvasRect);
+    const position = this.#geometryManager.getMousePosition(e, canvasRect);
     const shape = this.#createShape(v4(), this.shapeType, position);
 
     this.shapes.update((shapes) => shapes.add(shape));
@@ -101,9 +95,8 @@ class CanvasModel {
   deleteShape(): void {
     const selected = get(this.selectedShapes);
 
-    this.selectedShapes.update((value) => this.#removeSelectedShapes(value, selected));
-    this.shapes.update((value) => this.#removeSelectedShapes(value, selected));
-
+    this.selectedShapes.update((shapes) => this.#removeSelectedShapes(shapes, selected));
+    this.shapes.update((shapes) => this.#removeSelectedShapes(shapes, selected));
     toolbarModel.disableDeleteTool(true);
   }
 

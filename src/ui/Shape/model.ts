@@ -1,26 +1,27 @@
 import { type Writable, writable } from 'svelte/store';
+
 import { type ShapeConfig } from '../Canvas';
+import { GeometryManager } from '../../shared/services';
 
 export class ShapeModel {
   config: Writable<ShapeConfig | null> = writable(null);
-  #ROUND = 2;
+  #geometryManager: GeometryManager;
 
   constructor(attributes: ShapeConfig) {
+    this.#geometryManager = new GeometryManager();
     this.config.set(attributes);
   }
 
   move(e: MouseEvent): void {
-    this.config.update((value) => ({
-      ...(value as ShapeConfig),
-      x: Number(value?.x) + e.movementX,
-      y: Number(value?.y) + e.movementY,
+    this.config.update((shape) => ({
+      ...(shape as ShapeConfig),
+      ...this.#geometryManager.move(e, { x: Number(shape?.x), y: Number(shape?.y) }),
     }));
   }
 
   resize(e: MouseEvent, rect: DOMRect): void {
-    const width = this.#ROUND * Math.round(e.clientX / this.#ROUND) - rect.left;
-    const height = this.#ROUND * Math.round(e.clientY / this.#ROUND) - rect.top;
-    this.config.update((value) => ({ ...(value as ShapeConfig), width, height }));
+    const { width, height } = this.#geometryManager.resize(e, rect);
+    this.config.update((shape) => ({ ...(shape as ShapeConfig), width, height }));
   }
 
   select(selected: boolean): void {

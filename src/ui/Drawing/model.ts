@@ -3,16 +3,17 @@ import { v4 } from 'uuid';
 
 import { toolbarModel, type DrawingTool, Tools } from '../Toolbar';
 import type { ShapeConfig } from '../Canvas';
+import { GeometryManager, type Point } from '../../shared/services';
 
 export type FigureConfig = {
   uuid: string;
   type: DrawingTool | null;
-  path: Position[];
+  path: Point[];
 };
 
 export type Mouse = {
   type: DrawingTool | null;
-  path: Position[];
+  path: Point[];
   grabbers?: Map<GrabberNodeType, GrabberNode>;
   color?: string;
 };
@@ -20,7 +21,7 @@ export type Mouse = {
 export type GrabberNode = {
   uuid: string;
   type: GrabberNodeType;
-  position: Position;
+  position: Point;
   angle: number;
   selected: boolean;
   node?: ShapeConfig;
@@ -34,38 +35,28 @@ export enum GrabberNodes {
 }
 
 export type GrabberNodeType = keyof typeof GrabberNodes;
-export type Position = { x: number; y: number };
 
 class DrawingModel {
   figures: Writable<Set<FigureConfig>> = writable(new Set());
   grabbers: Writable<GrabberNode[]> = writable([]);
   mouse: Writable<Mouse | null> = writable(null);
 
+  #geometryManager: GeometryManager;
   tool: DrawingTool | null = null;
   pressed = false;
 
   constructor() {
+    this.#geometryManager = new GeometryManager();
     toolbarModel.drawingTool.subscribe((value) => {
       this.tool = value;
     });
   }
 
-  #getMousePosition(e: MouseEvent, rect: DOMRect): Position {
-    return {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    };
-  }
-
-  #calculateDegreesAngle(p1: Position, p2: Position): GrabberNode['angle'] {
-    return (Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180) / Math.PI;
-  }
-
-  #updateTargetGrabberPosition(position: Position): void {
+  #updateTargetGrabberPosition(position: Point): void {
     this.mouse.update((mouse) => {
-      const start = mouse?.path[0] as Position;
-      const end = mouse?.path[mouse.path.length - 1] as Position;
-      const angle = this.#calculateDegreesAngle(start, end);
+      const start = mouse?.path[0] as Point;
+      const end = mouse?.path[mouse.path.length - 1] as Point;
+      const angle = this.#geometryManager.calculateLineDegreesAngle(start, end);
 
       if (!mouse?.grabbers?.has(GrabberNodes.TARGET)) {
         const newTargetNode = this.#createGrabberNodeHelper(GrabberNodes.TARGET, position, angle);
@@ -79,10 +70,10 @@ class DrawingModel {
     });
   }
 
-  #updateMousePath(position: Position): void {
+  #updateMousePath(point: Point): void {
     this.mouse.update((mouse) => ({
       ...(mouse as Mouse),
-      path: [...(mouse?.path || []), position],
+      path: [...(mouse?.path || []), point],
     }));
   }
 
@@ -91,7 +82,7 @@ class DrawingModel {
     return { uuid: v4(), type: this.tool, path: mouseTracker?.path || [] };
   }
 
-  #createGrabberNodeHelper(type: GrabberNodeType, position: Position, angle = 0): GrabberNode {
+  #createGrabberNodeHelper(type: GrabberNodeType, position: Point, angle = 0): GrabberNode {
     return {
       uuid: v4(),
       type,
@@ -101,7 +92,7 @@ class DrawingModel {
     };
   }
 
-  #createMouseGrabberNode(position: Position): void {
+  #createMouseGrabberNode(position: Point): void {
     const sourceNode = this.#createGrabberNodeHelper(GrabberNodes.SOURCE, position);
     this.mouse.update((mouse) => ({
       ...(mouse as Mouse),
@@ -117,7 +108,7 @@ class DrawingModel {
   startPath(e: MouseEvent, rect: DOMRect): void {
     if (!this.tool) return;
     this.pressed = true;
-    const position = this.#getMousePosition(e, rect);
+    const position = this.#geometryManager.getMousePosition(e, rect);
 
     this.mouse.set({ type: this.tool, path: [position] });
     if (this.tool === Tools.CONNECT) this.#createMouseGrabberNode(position);
@@ -125,7 +116,7 @@ class DrawingModel {
 
   movePath(e: MouseEvent, rect: DOMRect): void {
     if (!this.tool || !this.pressed) return;
-    const position = this.#getMousePosition(e, rect);
+    const position = this.#geometryManager.getMousePosition(e, rect);
 
     this.#updateMousePath(position);
     if (this.tool === Tools.CONNECT) this.#updateTargetGrabberPosition(position);
