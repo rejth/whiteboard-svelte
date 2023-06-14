@@ -17,7 +17,7 @@
 <div class="node-grabber" style={grabberStyle}>
   <div
     class="connection-node"
-    class:dot={node.type === GrabberNodes.SOURCE}
+    class:dot={node.type === GrabberNodes.MIDDLE}
     class:arrow={node.type === GrabberNodes.TARGET}
     class:selected={node.selected}
     style={nodeStyle}

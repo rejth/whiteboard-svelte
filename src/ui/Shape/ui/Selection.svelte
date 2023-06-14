@@ -16,8 +16,7 @@
     const resize = resizeWatcher(cornerRef);
 
     for await (const e of resize) {
-      const rect = selectionRef.getBoundingClientRect();
-      model.resize(e as MouseEvent, rect);
+      model.resize(e as MouseEvent, selectionRef.getBoundingClientRect());
     }
   });
 </script>

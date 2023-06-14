@@ -26,7 +26,7 @@
 <svelte:document on:mousedown={onMouseDown} on:mousemove={onMouseMove} on:mouseup={onMouseUp} />
 
 <div>
-  {#each [...$grabbers.values()] as node (node.uuid)}
+  {#each [...$grabbers] as node (node.uuid)}
     <Grabber {node} />
   {/each}
 

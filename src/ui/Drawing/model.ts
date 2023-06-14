@@ -52,20 +52,36 @@ class DrawingModel {
     });
   }
 
-  #updateTargetGrabberPosition(position: Point): void {
+  #updateConnectionNode(mouse: Mouse | null, type: GrabberNodeType, point: Point, angle = 0): void {
+    if (!mouse?.grabbers?.has(type)) {
+      const newNode = this.#createGrabberNodeHelper(type, point, angle);
+      mouse?.grabbers?.set(type, newNode);
+    } else {
+      const node = mouse?.grabbers?.get(type);
+      mouse?.grabbers?.set(type, {
+        ...(node as GrabberNode),
+        position: point,
+        angle,
+      });
+    }
+  }
+
+  #updateTargetNodePosition(mouse: Mouse | null, point: Point): void {
+    const start = mouse?.path[0] as Point;
+    const angle = this.#geometryManager.calculateLineDegreesAngle(start, point);
+    this.#updateConnectionNode(mouse, GrabberNodes.TARGET, point, angle);
+  }
+
+  #updateMiddleNodePosition(mouse: Mouse | null, point: Point): void {
+    const start = mouse?.path[0] as Point;
+    const midPoint = this.#geometryManager.getLineDraggedPoint(start, point, []);
+    this.#updateConnectionNode(mouse, GrabberNodes.MIDDLE, midPoint);
+  }
+
+  #updateConnectionNodesPosition(point: Point): void {
     this.mouse.update((mouse) => {
-      const start = mouse?.path[0] as Point;
-      const end = mouse?.path[mouse.path.length - 1] as Point;
-      const angle = this.#geometryManager.calculateLineDegreesAngle(start, end);
-
-      if (!mouse?.grabbers?.has(GrabberNodes.TARGET)) {
-        const newTargetNode = this.#createGrabberNodeHelper(GrabberNodes.TARGET, position, angle);
-        mouse?.grabbers?.set(GrabberNodes.TARGET, newTargetNode);
-      } else {
-        const target = mouse?.grabbers?.get(GrabberNodes.TARGET);
-        mouse?.grabbers?.set(GrabberNodes.TARGET, { ...(target as GrabberNode), position, angle });
-      }
-
+      this.#updateMiddleNodePosition(mouse, point);
+      this.#updateTargetNodePosition(mouse, point);
       return { ...(mouse as Mouse) };
     });
   }
@@ -119,7 +135,7 @@ class DrawingModel {
     const position = this.#geometryManager.getMousePosition(e, rect);
 
     this.#updateMousePath(position);
-    if (this.tool === Tools.CONNECT) this.#updateTargetGrabberPosition(position);
+    if (this.tool === Tools.CONNECT) this.#updateConnectionNodesPosition(position);
   }
 
   endPath(): void {

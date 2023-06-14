@@ -67,17 +67,18 @@ class CanvasModel {
     return new Set([...store].filter((el) => !selected.has(el)));
   }
 
-  dragOverCanvas(e: MouseEvent, insideRect: boolean): void {
+  dragOverCanvas(e: MouseEvent, rect: DOMRect): void {
     const selected = get(this.selectedShapes);
+    const insideCanvas = this.#geometryManager.insideRect(e, rect);
 
-    if (insideRect && selected.size === 0 && !isDrawingToolSelected(this.tool)) {
+    if (insideCanvas && selected.size === 0 && !isDrawingToolSelected(this.tool)) {
       this.mousePosition.update((point) => this.#geometryManager.move(e, point));
     }
   }
 
-  addShape(e: MouseEvent, canvasRect: DOMRect): void {
+  addShape(e: MouseEvent, rect: DOMRect): void {
     if (!this.shapeType) return;
-    const position = this.#geometryManager.getMousePosition(e, canvasRect);
+    const position = this.#geometryManager.getMousePosition(e, rect);
     const shape = this.#createShape(v4(), this.shapeType, position);
 
     this.shapes.update((shapes) => shapes.add(shape));

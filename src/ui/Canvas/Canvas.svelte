@@ -28,9 +28,7 @@
     const dnd = dndWatcher(canvasRef);
 
     for await (const e of dnd) {
-      const event = e as MouseEvent;
-      const target = event.target as HTMLElement;
-      canvasModel.dragOverCanvas(event, target.isEqualNode(canvasRef));
+      canvasModel.dragOverCanvas(e as MouseEvent, canvasRef.getBoundingClientRect());
     }
   });
 
