@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { GrabberNodes, type GrabberNode } from '~/ui/Drawing';
+  import { Connections, type ConnectionNode } from '~/ui/Drawing';
 
-  export let node: GrabberNode;
+  export let node: ConnectionNode;
 
   $: grabberStyle = `
     top: ${node.position.y}px;
@@ -17,8 +17,8 @@
 <div class="node-grabber" style={grabberStyle}>
   <div
     class="connection-node"
-    class:dot={node.type === GrabberNodes.MIDDLE}
-    class:arrow={node.type === GrabberNodes.TARGET}
+    class:dot={node.type === Connections.MIDDLE}
+    class:arrow={node.type === Connections.TARGET}
     class:selected={node.selected}
     style={nodeStyle}
   />

@@ -30,8 +30,8 @@ export class GeometryManager {
   }
 
   getFigureRect(figure: FigureConfig): Point & Dimension {
-    const start = figure.path[0];
-    const end = figure.path[figure.path.length - 1];
+    const from = figure.path[0];
+    const to = figure.path[figure.path.length - 1];
 
     if (figure.type === Tools.PEN) {
       const px = figure.path.map((p) => p.x);
@@ -49,10 +49,10 @@ export class GeometryManager {
     }
 
     return {
-      x: Math.min(start.x, end.x),
-      y: Math.min(start.y, end.y),
-      width: Math.abs(start.x - end.x),
-      height: Math.abs(start.y - end.y),
+      x: Math.min(from.x, to.x),
+      y: Math.min(from.y, to.y),
+      width: Math.abs(from.x - to.x),
+      height: Math.abs(from.y - to.y),
     };
   }
 
@@ -71,19 +71,29 @@ export class GeometryManager {
   }
 
   calculateCurveDegreesAngle(curve: any): number {
-    // tangent vector at the very end of the curve
-    const d = curve.derivative(1);
+    const d = curve.derivative(1); // tangent vector at the very end of the curve
     const angle = ((Math.atan2(d.y, d.x) - Math.atan2(0, Math.abs(d.x))) * 180) / Math.PI;
     return Math.round(angle);
   }
 
-  getLineDraggedPoint(from: Point, to: Point, draggedPoints: Point[]): Point {
-    if (draggedPoints.length > 0) return draggedPoints[0];
-    // fallback if no dragged points (straight line) - midpoint
+  getLineMiddlePoint(from: Point, to: Point): Point {
     return { x: (to.x + from.x) * 0.5, y: (to.y + from.y) * 0.5 };
   }
 
-  bezierCurveFromPoints(from: Point, middle: Point, to: Point): any {
+  getBezierCurveFromPoints(from: Point, middle: Point, to: Point): any {
     return Bezier.quadraticFromPoints(from, middle, to);
+  }
+
+  getQuadraticCurveSVGPath(from: Point, to: Point, peakCurvePoint: Point): string {
+    if (!peakCurvePoint) {
+      const midPoint = this.getLineMiddlePoint(from, to);
+      return `M ${from.x} ${from.y} Q ${midPoint.x} ${midPoint.y} ${to.x} ${to.y}`;
+    }
+
+    const curve = this.getBezierCurveFromPoints(from, peakCurvePoint, to).getLUT();
+
+    const path = [`M ${curve[0].x} ${curve[0].y}`];
+    const collector = curve.slice(1, curve.length).map((p: Point) => `L ${p.x} ${p.y}`);
+    return path.concat(collector).join(' ');
   }
 }

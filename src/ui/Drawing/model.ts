@@ -14,13 +14,13 @@ export type FigureConfig = {
 export type Mouse = {
   type: DrawingTool | null;
   path: Point[];
-  grabbers?: Map<GrabberNodeType, GrabberNode>;
+  grabbers?: Map<ConnectionType, ConnectionNode>;
   color?: string;
 };
 
-export type GrabberNode = {
+export type ConnectionNode = {
   uuid: string;
-  type: GrabberNodeType;
+  type: ConnectionType;
   position: Point;
   angle: number;
   selected: boolean;
@@ -28,17 +28,17 @@ export type GrabberNode = {
   style?: string;
 };
 
-export enum GrabberNodes {
+export enum Connections {
   SOURCE = 'SOURCE',
   MIDDLE = 'MIDDLE',
   TARGET = 'TARGET',
 }
 
-export type GrabberNodeType = keyof typeof GrabberNodes;
+export type ConnectionType = keyof typeof Connections;
 
 class DrawingModel {
   figures: Writable<Set<FigureConfig>> = writable(new Set());
-  grabbers: Writable<GrabberNode[]> = writable([]);
+  grabbers: Writable<ConnectionNode[]> = writable([]);
   mouse: Writable<Mouse | null> = writable(null);
 
   #geometryManager: GeometryManager;
@@ -52,14 +52,14 @@ class DrawingModel {
     });
   }
 
-  #updateConnectionNode(mouse: Mouse | null, type: GrabberNodeType, point: Point, angle = 0): void {
+  #updateConnectionNode(mouse: Mouse | null, type: ConnectionType, point: Point, angle = 0): void {
     if (!mouse?.grabbers?.has(type)) {
-      const newNode = this.#createGrabberNodeHelper(type, point, angle);
+      const newNode = this.#createConnectionNode(type, point, angle);
       mouse?.grabbers?.set(type, newNode);
     } else {
       const node = mouse?.grabbers?.get(type);
       mouse?.grabbers?.set(type, {
-        ...(node as GrabberNode),
+        ...(node as ConnectionNode),
         position: point,
         angle,
       });
@@ -69,13 +69,13 @@ class DrawingModel {
   #updateTargetNodePosition(mouse: Mouse | null, point: Point): void {
     const start = mouse?.path[0] as Point;
     const angle = this.#geometryManager.calculateLineDegreesAngle(start, point);
-    this.#updateConnectionNode(mouse, GrabberNodes.TARGET, point, angle);
+    this.#updateConnectionNode(mouse, Connections.TARGET, point, angle);
   }
 
   #updateMiddleNodePosition(mouse: Mouse | null, point: Point): void {
     const start = mouse?.path[0] as Point;
-    const midPoint = this.#geometryManager.getLineDraggedPoint(start, point, []);
-    this.#updateConnectionNode(mouse, GrabberNodes.MIDDLE, midPoint);
+    const midPoint = this.#geometryManager.getLineMiddlePoint(start, point);
+    this.#updateConnectionNode(mouse, Connections.MIDDLE, midPoint);
   }
 
   #updateConnectionNodesPosition(point: Point): void {
@@ -98,7 +98,7 @@ class DrawingModel {
     return { uuid: v4(), type: this.tool, path: mouseTracker?.path || [] };
   }
 
-  #createGrabberNodeHelper(type: GrabberNodeType, position: Point, angle = 0): GrabberNode {
+  #createConnectionNode(type: ConnectionType, position: Point, angle = 0): ConnectionNode {
     return {
       uuid: v4(),
       type,
@@ -108,15 +108,15 @@ class DrawingModel {
     };
   }
 
-  #createMouseGrabberNode(position: Point): void {
-    const sourceNode = this.#createGrabberNodeHelper(GrabberNodes.SOURCE, position);
+  #createMouseConnectionNode(position: Point): void {
+    const sourceNode = this.#createConnectionNode(Connections.SOURCE, position);
     this.mouse.update((mouse) => ({
       ...(mouse as Mouse),
-      grabbers: new Map([[GrabberNodes.SOURCE, sourceNode]]),
+      grabbers: new Map([[Connections.SOURCE, sourceNode]]),
     }));
   }
 
-  #updateGrabberNodesList(): void {
+  #updateConnectionNodesList(): void {
     const mouseTracker = get(this.mouse);
     this.grabbers.update((value) => [...value, ...(mouseTracker?.grabbers?.values() || [])]);
   }
@@ -127,7 +127,7 @@ class DrawingModel {
     const position = this.#geometryManager.getMousePosition(e, rect);
 
     this.mouse.set({ type: this.tool, path: [position] });
-    if (this.tool === Tools.CONNECT) this.#createMouseGrabberNode(position);
+    if (this.tool === Tools.CONNECT) this.#createMouseConnectionNode(position);
   }
 
   movePath(e: MouseEvent, rect: DOMRect): void {
@@ -142,7 +142,7 @@ class DrawingModel {
     if (!this.tool) return;
     this.pressed = false;
 
-    if (this.tool === Tools.CONNECT) this.#updateGrabberNodesList();
+    if (this.tool === Tools.CONNECT) this.#updateConnectionNodesList();
     this.figures.update((value) => value.add(this.#createFigure()));
     this.mouse.set(null);
   }

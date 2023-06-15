@@ -5,7 +5,7 @@
 
   import { drawingModel } from './model';
   import { Tools, type DrawingTool } from '../Toolbar';
-  import { Grabber } from '../Figure';
+  import { ConnectionNode } from '../Figure';
 
   let svgRef: SVGSVGElement;
   const { figures, grabbers, mouse } = drawingModel;
@@ -27,12 +27,12 @@
 
 <div>
   {#each [...$grabbers] as node (node.uuid)}
-    <Grabber {node} />
+    <ConnectionNode {node} />
   {/each}
 
   {#if $mouse && $mouse.grabbers}
     {#each [...$mouse.grabbers.values()] as node (node.uuid)}
-      <Grabber {node} />
+      <ConnectionNode {node} />
     {/each}
   {/if}
 
