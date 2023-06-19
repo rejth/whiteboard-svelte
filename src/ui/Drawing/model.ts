@@ -9,12 +9,13 @@ export type FigureConfig = {
   uuid: string;
   type: DrawingTool | null;
   path: Point[];
+  svgPath?: string;
 };
 
 export type Mouse = {
   type: DrawingTool | null;
   path: Point[];
-  grabbers?: Map<ConnectionType, ConnectionNode>;
+  connections?: Map<ConnectionType, ConnectionNode>;
   color?: string;
 };
 
@@ -38,7 +39,7 @@ export type ConnectionType = keyof typeof Connections;
 
 class DrawingModel {
   figures: Writable<Set<FigureConfig>> = writable(new Set());
-  grabbers: Writable<ConnectionNode[]> = writable([]);
+  connections: Writable<ConnectionNode[]> = writable([]);
   mouse: Writable<Mouse | null> = writable(null);
 
   #geometryManager: GeometryManager;
@@ -53,12 +54,12 @@ class DrawingModel {
   }
 
   #updateConnectionNode(mouse: Mouse | null, type: ConnectionType, point: Point, angle = 0): void {
-    if (!mouse?.grabbers?.has(type)) {
+    if (!mouse?.connections?.has(type)) {
       const newNode = this.#createConnectionNode(type, point, angle);
-      mouse?.grabbers?.set(type, newNode);
+      mouse?.connections?.set(type, newNode);
     } else {
-      const node = mouse?.grabbers?.get(type);
-      mouse?.grabbers?.set(type, {
+      const node = mouse?.connections?.get(type);
+      mouse?.connections?.set(type, {
         ...(node as ConnectionNode),
         position: point,
         angle,
@@ -99,26 +100,20 @@ class DrawingModel {
   }
 
   #createConnectionNode(type: ConnectionType, position: Point, angle = 0): ConnectionNode {
-    return {
-      uuid: v4(),
-      type,
-      position,
-      angle,
-      selected: false,
-    };
+    return { uuid: v4(), type, position, angle, selected: false };
   }
 
   #createMouseConnectionNode(position: Point): void {
     const sourceNode = this.#createConnectionNode(Connections.SOURCE, position);
     this.mouse.update((mouse) => ({
       ...(mouse as Mouse),
-      grabbers: new Map([[Connections.SOURCE, sourceNode]]),
+      connections: new Map([[Connections.SOURCE, sourceNode]]),
     }));
   }
 
   #updateConnectionNodesList(): void {
     const mouseTracker = get(this.mouse);
-    this.grabbers.update((value) => [...value, ...(mouseTracker?.grabbers?.values() || [])]);
+    this.connections.update((value) => [...value, ...(mouseTracker?.connections?.values() || [])]);
   }
 
   startPath(e: MouseEvent, rect: DOMRect): void {

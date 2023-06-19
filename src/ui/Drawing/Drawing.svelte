@@ -1,22 +1,11 @@
 <script lang="ts">
-  import { type ComponentType } from 'svelte';
-
-  import { Line, Pen, Rect } from '~/ui/Figure';
+  import { Figure } from '~/ui/Figure';
 
   import { drawingModel } from './model';
-  import { Tools, type DrawingTool } from '../Toolbar';
   import { ConnectionNode } from '../Figure';
 
   let svgRef: SVGSVGElement;
-  const { figures, grabbers, mouse } = drawingModel;
-
-  const widgets: Record<DrawingTool, ComponentType> = {
-    [Tools.CONNECT]: Line,
-    [Tools.SELECT]: Rect,
-    [Tools.PEN]: Pen,
-  };
-
-  const renderWidget = (type: DrawingTool | null) => widgets[type || Tools.CONNECT];
+  const { figures, connections, mouse } = drawingModel;
 
   const onMouseDown = (e: MouseEvent) => drawingModel.startPath(e, svgRef.getBoundingClientRect());
   const onMouseMove = (e: MouseEvent) => drawingModel.movePath(e, svgRef.getBoundingClientRect());
@@ -26,23 +15,23 @@
 <svelte:document on:mousedown={onMouseDown} on:mousemove={onMouseMove} on:mouseup={onMouseUp} />
 
 <div>
-  {#each [...$grabbers] as node (node.uuid)}
+  {#each [...$connections] as node (node.uuid)}
     <ConnectionNode {node} />
   {/each}
 
-  {#if $mouse && $mouse.grabbers}
-    {#each [...$mouse.grabbers.values()] as node (node.uuid)}
+  {#if $mouse && $mouse.connections}
+    {#each [...$mouse.connections.values()] as node (node.uuid)}
       <ConnectionNode {node} />
     {/each}
   {/if}
 
   <svg class="drawing" bind:this={svgRef}>
-    {#each [...$figures] as { uuid, type, path } (uuid)}
-      <svelte:component this={renderWidget(type)} {path} />
+    {#each [...$figures] as figure (figure.uuid)}
+      <Figure type={figure.type} path={figure.path} />
     {/each}
 
     {#if $mouse}
-      <svelte:component this={renderWidget($mouse.type)} path={$mouse.path} />
+      <Figure type={$mouse.type} path={$mouse.path} />
     {/if}
   </svg>
 </div>

@@ -2,6 +2,7 @@
   import { Connections, type ConnectionNode } from '~/ui/Drawing';
 
   export let node: ConnectionNode;
+  let nodeRef: HTMLDivElement;
 
   $: grabberStyle = `
     top: ${node.position.y}px;
@@ -21,6 +22,7 @@
     class:arrow={node.type === Connections.TARGET}
     class:selected={node.selected}
     style={nodeStyle}
+    bind:this={nodeRef}
   />
 </div>
 
