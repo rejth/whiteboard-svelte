@@ -9,6 +9,8 @@
   import { ShapeModel } from '../model';
 
   export let settings: ShapeConfig;
+  export let multiselect: boolean;
+  export let clearAll: boolean;
 
   const shapeModel = new ShapeModel(settings);
   const { config } = shapeModel;
@@ -22,15 +24,17 @@
     transform: translate(${$config?.x}px, ${$config?.y}px);
   `;
 
+  $: clearAll ? onClickOutside() : null;
+
   onMount(async () => {
     const dnd = dndWatcher(shapeRef);
-
     for await (const e of dnd) {
       shapeModel.move(e as MouseEvent);
     }
   });
 
   const onClickOutside = () => {
+    if (multiselect) return;
     shapeModel.select(false);
     canvasModel.clearAllSelectedShapes();
     toolbarModel.disableDeleteTool(true);
@@ -48,7 +52,6 @@
   use:clickOutside={{ exclude: [deleteIcon] }}
   on:mousedown={onSelect}
   on:outclick={onClickOutside}
-  on:keydown
 >
   <div class="shape" style={styles} bind:this={shapeRef}>
     <slot />

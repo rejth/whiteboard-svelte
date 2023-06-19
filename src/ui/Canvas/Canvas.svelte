@@ -9,9 +9,12 @@
   import { canvasModel } from './model';
   import { isDrawingToolSelected } from '../Toolbar/lib';
 
-  let canvasRef: HTMLDivElement;
   const { shapes, mousePosition } = canvasModel;
   const { tool } = toolbarModel;
+
+  let canvasRef: HTMLDivElement;
+  let multiselect = false;
+  let clearAll = false;
 
   const widgets: Record<ShapeType, ComponentType> = {
     [Tools.NOTE]: Note,
@@ -26,7 +29,6 @@
 
   onMount(async () => {
     const dnd = dndWatcher(canvasRef);
-
     for await (const e of dnd) {
       canvasModel.dragOverCanvas(e as MouseEvent, canvasRef.getBoundingClientRect());
     }
@@ -34,6 +36,16 @@
 
   const onClick = (e: MouseEvent) => {
     canvasModel.addShape(e, canvasRef.getBoundingClientRect());
+  };
+
+  const onKeydown = (e: KeyboardEvent) => {
+    if (e.code === 'ShiftLeft') return (multiselect = true);
+    if (e.code === 'Escape') clearAll = true;
+  };
+
+  const onKeyup = () => {
+    multiselect = false;
+    clearAll = false;
   };
 </script>
 
@@ -47,10 +59,11 @@
     style={styles}
     bind:this={canvasRef}
     on:click={onClick}
-    on:keydown
+    on:keydown={onKeydown}
+    on:keyup={onKeyup}
   >
     {#each [...$shapes] as shape (shape.uuid)}
-      <Shape settings={shape}>
+      <Shape settings={shape} {multiselect} {clearAll}>
         <svelte:component this={widgets[shape.type]} />
       </Shape>
     {/each}

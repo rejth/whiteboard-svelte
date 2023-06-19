@@ -4,8 +4,8 @@
   import { drawingModel } from './model';
   import { ConnectionNode } from '../Figure';
 
-  let svgRef: SVGSVGElement;
   const { figures, connections, mouse } = drawingModel;
+  let svgRef: SVGSVGElement;
 
   const onMouseDown = (e: MouseEvent) => drawingModel.startPath(e, svgRef.getBoundingClientRect());
   const onMouseMove = (e: MouseEvent) => drawingModel.movePath(e, svgRef.getBoundingClientRect());

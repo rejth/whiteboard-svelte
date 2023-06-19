@@ -2,7 +2,6 @@
   import { onMount } from 'svelte';
 
   import { resizeWatcher } from '~/shared/lib';
-
   import { type ShapeModel } from '../model';
 
   export let model: ShapeModel;
@@ -14,7 +13,6 @@
 
   onMount(async () => {
     const resize = resizeWatcher(cornerRef);
-
     for await (const e of resize) {
       model.resize(e as MouseEvent, selectionRef.getBoundingClientRect());
     }
