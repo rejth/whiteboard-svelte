@@ -1,12 +1,10 @@
 <script lang="ts">
-  export let path: { x: number; y: number }[];
+  import { GeometryManager, type Point } from '~/shared/services';
 
-  $: rect = {
-    x: path[0].x,
-    y: path[0].y,
-    width: path[path.length - 1].x - path[0].x,
-    height: path[path.length - 1].y - path[0].y,
-  };
+  export let path: Point[];
+  const geometryManager = new GeometryManager();
+
+  $: rect = geometryManager.getPointerMoveRectCoordinates(path);
 </script>
 
 <rect class="figure-rect" {...rect} />

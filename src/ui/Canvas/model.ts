@@ -27,6 +27,7 @@ const dimensions: Record<ShapeType, Dimension> = {
 class CanvasModel {
   shapes: Writable<Set<ShapeConfig>> = writable(new Set());
   selectedShapes: Writable<Set<ShapeConfig>> = writable(new Set());
+  selection: Writable<Point[]> = writable([]);
   mousePosition: Writable<{ x: number; y: number }> = writable({ x: 0, y: 0 });
 
   #geometryManager: GeometryManager;
@@ -67,13 +68,28 @@ class CanvasModel {
     return new Set([...store].filter((el) => !selected.has(el)));
   }
 
-  dragOverCanvas(e: MouseEvent, rect: DOMRect): void {
+  dragCanvas(e: MouseEvent, rect: DOMRect): void {
+    if (isDrawingToolSelected(this.tool) || this.tool === Tools.SELECT) return;
+
     const selected = get(this.selectedShapes);
     const insideCanvas = this.#geometryManager.insideRect(e, rect);
-
-    if (insideCanvas && selected.size === 0 && !isDrawingToolSelected(this.tool)) {
+    if (insideCanvas && selected.size === 0) {
       this.mousePosition.update((point) => this.#geometryManager.move(e, point));
     }
+  }
+
+  dragSelection(e: MouseEvent, rect: DOMRect): void {
+    if (this.tool !== Tools.SELECT) return;
+    const insideCanvas = this.#geometryManager.insideRect(e, rect);
+
+    if (insideCanvas) {
+      const point = this.#geometryManager.getMousePosition(e, rect);
+      this.selection.update((path) => [...path, point]);
+    }
+  }
+
+  resetSelection(): void {
+    this.selection.set([]);
   }
 
   addShape(e: MouseEvent, rect: DOMRect): void {

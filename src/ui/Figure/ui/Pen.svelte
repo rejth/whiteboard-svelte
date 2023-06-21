@@ -1,5 +1,7 @@
 <script lang="ts">
-  export let path: { x: number; y: number }[];
+  import type { Point } from '~/shared/services';
+
+  export let path: Point[];
 
   $: curve = [`M ${path[0].x} ${path[0].y}`];
   $: collector = path.map((point) => `L ${point.x} ${point.y}`);

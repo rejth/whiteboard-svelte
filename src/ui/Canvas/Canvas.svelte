@@ -4,12 +4,12 @@
   import { dndWatcher } from '~/shared/lib';
   import { Drawing } from '~/ui/Drawing';
   import { Tools, type ShapeType, toolbarModel } from '~/ui/Toolbar';
-  import { Shape, Note, Text, Area } from '~/ui/Shape';
+  import { Shape, Note, Text, Area, RectangularDragSelection } from '~/ui/Shape';
 
   import { canvasModel } from './model';
   import { isDrawingToolSelected } from '../Toolbar/lib';
 
-  const { shapes, mousePosition } = canvasModel;
+  const { shapes, mousePosition, selection } = canvasModel;
   const { tool } = toolbarModel;
 
   let canvasRef: HTMLDivElement;
@@ -24,23 +24,32 @@
 
   $: styles = `
     transform: translate(${$mousePosition.x}px, ${$mousePosition.y}px);
-    cursor: ${isDrawingToolSelected($tool) ? 'default' : 'grab'};
+    cursor: ${isDrawingToolSelected($tool) || $tool === Tools.SELECT ? 'default' : 'grab'};
   `;
 
   onMount(async () => {
     const dnd = dndWatcher(canvasRef);
     for await (const e of dnd) {
-      canvasModel.dragOverCanvas(e as MouseEvent, canvasRef.getBoundingClientRect());
+      canvasModel.dragCanvas(e as MouseEvent, canvasRef.getBoundingClientRect());
+    }
+  });
+
+  onMount(async () => {
+    const selection = dndWatcher(canvasRef);
+    for await (const e of selection) {
+      canvasModel.dragSelection(e as MouseEvent, canvasRef.getBoundingClientRect());
     }
   });
 
   const onClick = (e: MouseEvent) => {
     canvasModel.addShape(e, canvasRef.getBoundingClientRect());
+    canvasModel.resetSelection();
   };
 
   const onKeydown = (e: KeyboardEvent) => {
     if (e.code === 'ShiftLeft') return (multiselect = true);
-    if (e.code === 'Escape') clearAll = true;
+    if (e.code === 'Escape') return (clearAll = true);
+    if (e.code === 'Delete') canvasModel.deleteShape();
   };
 
   const onKeyup = () => {
@@ -62,6 +71,9 @@
     on:keydown={onKeydown}
     on:keyup={onKeyup}
   >
+    {#if $tool === Tools.SELECT}
+      <RectangularDragSelection path={$selection} />
+    {/if}
     {#each [...$shapes] as shape (shape.uuid)}
       <Shape settings={shape} {multiselect} {clearAll}>
         <svelte:component this={widgets[shape.type]} />

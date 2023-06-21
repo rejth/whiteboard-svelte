@@ -3,7 +3,7 @@ import { isDrawingToolSelected, isShapeToolSelected } from './lib';
 
 export type Tool = keyof typeof Tools;
 export type ShapeType = 'NOTE' | 'TEXT' | 'AREA';
-export type DrawingTool = 'SELECT' | 'CONNECT' | 'PEN';
+export type DrawingTool = 'RECT' | 'CONNECT' | 'PEN';
 export type ServiceTool = 'PAN' | 'DELETE';
 export enum Tools {
   NOTE = 'NOTE',
@@ -12,6 +12,7 @@ export enum Tools {
   PEN = 'PEN',
   SELECT = 'SELECT',
   CONNECT = 'CONNECT',
+  RECT = 'RECT',
   PAN = 'PAN',
   DELETE = 'DELETE',
 }

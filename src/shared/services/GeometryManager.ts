@@ -29,9 +29,20 @@ export class GeometryManager {
     return { width, height };
   }
 
+  getPointerMoveRectCoordinates(path: Point[]): Point & Dimension {
+    const from = path[0] ?? 0;
+    const to = path[path.length - 1] ?? 0;
+    return {
+      x: Math.min(from.x, to.x),
+      y: Math.min(from.y, to.y),
+      width: Math.abs(from.x - to.x),
+      height: Math.abs(from.y - to.y),
+    };
+  }
+
   getFigureRect(figure: FigureConfig): Point & Dimension {
-    const from = figure.path[0];
-    const to = figure.path[figure.path.length - 1];
+    const from = figure.path[0] ?? 0;
+    const to = figure.path[figure.path.length - 1] ?? 0;
 
     if (figure.type === Tools.PEN) {
       const px = figure.path.map((p) => p.x);

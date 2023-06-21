@@ -9,8 +9,8 @@
   export let type: DrawingTool | null;
 
   const widgets: Record<DrawingTool, ComponentType> = {
+    [Tools.RECT]: Rect,
     [Tools.CONNECT]: Line,
-    [Tools.SELECT]: Rect,
     [Tools.PEN]: Pen,
   };
 
