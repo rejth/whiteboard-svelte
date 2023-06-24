@@ -14,7 +14,7 @@
 
   let canvasRef: HTMLDivElement;
   let multiselect = false;
-  let clearAll = false;
+  let clearSelected = false;
 
   const widgets: Record<ShapeType, ComponentType> = {
     [Tools.NOTE]: Note,
@@ -48,13 +48,13 @@
 
   const onKeydown = (e: KeyboardEvent) => {
     if (e.code === 'ShiftLeft') return (multiselect = true);
-    if (e.code === 'Escape') return (clearAll = true);
+    if (e.code === 'Escape') return (clearSelected = true);
     if (e.code === 'Delete') canvasModel.deleteShape();
   };
 
   const onKeyup = () => {
     multiselect = false;
-    clearAll = false;
+    clearSelected = false;
   };
 </script>
 
@@ -74,8 +74,8 @@
     {#if $tool === Tools.SELECT}
       <RectangularDragSelection path={$selection} />
     {/if}
-    {#each [...$shapes] as shape (shape.uuid)}
-      <Shape settings={shape} {multiselect} {clearAll}>
+    {#each [...$shapes.values()] as shape (shape.uuid)}
+      <Shape settings={shape} {multiselect} {clearSelected}>
         <svelte:component this={widgets[shape.type]} />
       </Shape>
     {/each}

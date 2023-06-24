@@ -3,11 +3,17 @@ import { v4 } from 'uuid';
 
 import { type ShapeType, toolbarModel, Tools, type Tool } from '../Toolbar';
 import { isDrawingToolSelected } from '../Toolbar/lib';
-import { GeometryManager, type Dimension, type Point } from '../../shared/services';
+import {
+  GeometryManager,
+  type Dimension,
+  type Point,
+  type RectPosition,
+} from '../../shared/services';
 
 export type ShapeConfig = {
   uuid: string;
   type: ShapeType;
+  rect: RectPosition;
   x: number;
   y: number;
   width: number;
@@ -26,9 +32,9 @@ const dimensions: Record<ShapeType, Dimension> = {
 
 class CanvasModel {
   shapes: Writable<Set<ShapeConfig>> = writable(new Set());
-  selectedShapes: Writable<Set<ShapeConfig>> = writable(new Set());
+  selectedShapes: Writable<Map<string, ShapeConfig>> = writable(new Map());
   selection: Writable<Point[]> = writable([]);
-  mousePosition: Writable<{ x: number; y: number }> = writable({ x: 0, y: 0 });
+  mousePosition: Writable<Point> = writable({ x: 0, y: 0 });
 
   #geometryManager: GeometryManager;
   shapeType: ShapeType | null = null;
@@ -45,27 +51,36 @@ class CanvasModel {
     });
   }
 
-  #createShape(uuid: string, type: ShapeType, point: Point): ShapeConfig {
+  #createShape(uuid: string, type: ShapeType, { x, y }: Point): ShapeConfig {
+    const { width, height } = dimensions[type];
     const styles = `
-      width: ${dimensions[type].width}em;
-      height: ${dimensions[type].height}em;
-      transform: translate(${point.x}px, ${point.y}px);
+      width: ${width}em;
+      height: ${height}em;
+      transform: translate(${x}px, ${y}px);
     `;
 
     return {
       uuid,
       type,
-      selected: true,
-      width: dimensions[type].width,
-      height: dimensions[type].height,
-      x: point.x,
-      y: point.y,
+      width,
+      height,
+      x,
+      y,
       styles,
+      rect: this.#geometryManager.getRectPosition({ x, y, width, height }),
+      selected: true,
     };
   }
 
-  #removeSelectedShapes(store: Set<ShapeConfig>, selected: Set<ShapeConfig>): Set<ShapeConfig> {
-    return new Set([...store].filter((el) => !selected.has(el)));
+  #removeSelected(
+    store: Map<string, ShapeConfig>,
+    selected: Map<string, ShapeConfig>,
+  ): Map<string, ShapeConfig> {
+    return new Map([...store.entries()].filter(([key]) => !selected.has(key)));
+  }
+
+  #removeShapes(store: Set<ShapeConfig>, selected: Map<string, ShapeConfig>): Set<ShapeConfig> {
+    return new Set([...store].filter((shape) => !selected.has(shape.uuid)));
   }
 
   dragCanvas(e: MouseEvent, rect: DOMRect): void {
@@ -102,22 +117,26 @@ class CanvasModel {
 
     toolbarModel.tool.set(Tools.PAN);
     toolbarModel.shapeType.set(null);
-    toolbarModel.disableDeletion.set(false);
   }
 
   selectShape(shape: ShapeConfig): void {
-    this.selectedShapes.update((selected) => selected.add(shape));
+    this.selectedShapes.update((selected) => selected.set(shape.uuid, shape));
+  }
+
+  deselectShape(shape: ShapeConfig): void {
+    this.selectedShapes.update((selected) => {
+      selected.delete(shape.uuid);
+      return selected;
+    });
   }
 
   deleteShape(): void {
     const selected = get(this.selectedShapes);
-
-    this.selectedShapes.update((shapes) => this.#removeSelectedShapes(shapes, selected));
-    this.shapes.update((shapes) => this.#removeSelectedShapes(shapes, selected));
-    toolbarModel.disableDeleteTool(true);
+    this.selectedShapes.update((shapes) => this.#removeSelected(shapes, selected));
+    this.shapes.update((shapes) => this.#removeShapes(shapes, selected));
   }
 
-  clearAllSelectedShapes(): void {
+  clearAllSelected(): void {
     this.selectedShapes.update((selected) => {
       selected.clear();
       return selected;

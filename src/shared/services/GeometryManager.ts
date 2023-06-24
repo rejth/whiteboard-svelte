@@ -3,8 +3,10 @@ import { Bezier } from 'bezier-js';
 import { Tools } from '../../ui/Toolbar';
 import type { FigureConfig } from '../../ui/Drawing';
 
-export type Point = { x: number; y: number };
-export type Dimension = { width: number; height: number };
+export type Point = Pick<DOMRect, 'x' | 'y'>;
+export type Dimension = Pick<DOMRect, 'width' | 'height'>;
+export type RectPosition = Pick<DOMRect, 'top' | 'bottom' | 'left' | 'right'>;
+export type RectDimension = Point & Dimension;
 
 export class GeometryManager {
   #ROUND = 2;
@@ -29,7 +31,7 @@ export class GeometryManager {
     return { width, height };
   }
 
-  getPointerMoveRectCoordinates(path: Point[]): Point & Dimension {
+  getRectDimension(path: Point[]): RectDimension {
     const from = path[0] ?? 0;
     const to = path[path.length - 1] ?? 0;
     return {
@@ -40,7 +42,7 @@ export class GeometryManager {
     };
   }
 
-  getFigureRect(figure: FigureConfig): Point & Dimension {
+  getFigureRect(figure: FigureConfig): RectDimension {
     const from = figure.path[0] ?? 0;
     const to = figure.path[figure.path.length - 1] ?? 0;
 
@@ -65,6 +67,24 @@ export class GeometryManager {
       width: Math.abs(from.x - to.x),
       height: Math.abs(from.y - to.y),
     };
+  }
+
+  getRectPosition(rect: RectDimension): RectPosition {
+    return {
+      left: rect.x,
+      top: rect.y,
+      bottom: rect.y + rect.height,
+      right: rect.x + rect.width,
+    };
+  }
+
+  overlapRect(rectA: RectPosition, rectB: RectPosition): boolean {
+    return (
+      rectA.left < rectB.right &&
+      rectA.right > rectB.left &&
+      rectA.top < rectB.bottom &&
+      rectA.bottom > rectB.top
+    );
   }
 
   insideRect(p: Point, rect: DOMRect): boolean {

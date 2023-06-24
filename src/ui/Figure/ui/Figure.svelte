@@ -18,6 +18,3 @@
 </script>
 
 <svelte:component this={renderWidget(type)} {path} />
-
-<style>
-</style>

@@ -21,9 +21,8 @@ class ToolbarModel {
   tool: Writable<Tool> = writable('PAN');
   shapeType: Writable<ShapeType | null> = writable(null);
   drawingTool: Writable<DrawingTool | null> = writable(null);
-  disableDeletion: Writable<boolean> = writable(true);
 
-  setShapeType(tool: Tool): void {
+  #setShapeType(tool: Tool): void {
     if (isShapeToolSelected(tool)) {
       this.shapeType.set(tool as ShapeType);
     } else {
@@ -31,7 +30,7 @@ class ToolbarModel {
     }
   }
 
-  setDrawingTool(tool: Tool): void {
+  #setDrawingTool(tool: Tool): void {
     if (isDrawingToolSelected(tool)) {
       this.drawingTool.set(tool as DrawingTool);
     } else {
@@ -41,12 +40,8 @@ class ToolbarModel {
 
   changeTool(tool: Tool): void {
     this.tool.set(tool);
-    this.setShapeType(tool);
-    this.setDrawingTool(tool);
-  }
-
-  disableDeleteTool(disabled: boolean): void {
-    this.disableDeletion.set(disabled);
+    this.#setShapeType(tool);
+    this.#setDrawingTool(tool);
   }
 }
 

@@ -4,7 +4,7 @@
   export let path: Point[];
   const geometryManager = new GeometryManager();
 
-  $: rect = geometryManager.getPointerMoveRectCoordinates(path);
+  $: rect = geometryManager.getRectDimension(path);
 </script>
 
 <rect class="figure-rect" {...rect} />

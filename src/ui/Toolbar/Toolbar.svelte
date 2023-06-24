@@ -12,7 +12,8 @@
 
   import { toolbarModel, Tools, type Tool } from '.';
 
-  const { tool, disableDeletion } = toolbarModel;
+  const { tool } = toolbarModel;
+  const { selectedShapes } = canvasModel;
 
   $: tools = [
     {
@@ -62,7 +63,7 @@
       type: Tools.DELETE,
       icon: trashIcon,
       hoverText: 'Delete selected item(s)',
-      disabled: $disableDeletion,
+      disabled: $selectedShapes.size === 0,
     },
   ];
 

@@ -3,47 +3,47 @@
 
   import { clickOutside, dndWatcher } from '~/shared/lib';
   import { canvasModel, type ShapeConfig } from '~/ui/Canvas';
-  import { toolbarModel } from '~/ui/Toolbar';
 
   import { Selection } from './';
   import { ShapeModel } from '../model';
 
   export let settings: ShapeConfig;
   export let multiselect: boolean;
-  export let clearAll: boolean;
+  export let clearSelected: boolean;
 
   const shapeModel = new ShapeModel(settings);
-  const { config } = shapeModel;
+  const { selection } = canvasModel;
+  const { shape } = shapeModel;
 
   const deleteIcon = document.getElementById('toolbar');
   let shapeRef: HTMLDivElement;
 
   $: styles = `
-    width: ${$config?.width}px;
-    height: ${$config?.height}px;
-    transform: translate(${$config?.x}px, ${$config?.y}px);
+    width: ${$shape?.width}px;
+    height: ${$shape?.height}px;
+    transform: translate(${$shape?.x}px, ${$shape?.y}px);
   `;
 
-  $: clearAll ? onClickOutside() : null;
+  $: shapeModel.overlap($selection);
+
+  $: clearSelected ? onClickOutside() : null;
 
   onMount(async () => {
     const dnd = dndWatcher(shapeRef);
     for await (const e of dnd) {
-      shapeModel.move(e as MouseEvent);
+      shapeModel.move(e as MouseEvent, shapeRef.getBoundingClientRect());
     }
   });
 
   const onClickOutside = () => {
     if (multiselect) return;
     shapeModel.select(false);
-    canvasModel.clearAllSelectedShapes();
-    toolbarModel.disableDeleteTool(true);
+    canvasModel.clearAllSelected();
   };
 
   const onSelect = () => {
     shapeModel.select(true);
     canvasModel.selectShape(settings);
-    toolbarModel.disableDeleteTool(false);
   };
 </script>
 
@@ -56,7 +56,7 @@
   <div class="shape" style={styles} bind:this={shapeRef}>
     <slot />
   </div>
-  {#if $config?.selected}
+  {#if $shape?.selected}
     <Selection {styles} model={shapeModel} />
   {/if}
 </div>

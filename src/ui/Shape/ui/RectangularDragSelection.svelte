@@ -4,7 +4,7 @@
   export let path: Point[];
   const geometryManager = new GeometryManager();
 
-  $: pointer = geometryManager.getPointerMoveRectCoordinates(path);
+  $: pointer = geometryManager.getRectDimension(path);
 
   $: style = `
     left: ${pointer.x}px;
