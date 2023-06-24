@@ -12,8 +12,6 @@
   },
   "plugins": ["svelte3", "@typescript-eslint", "import", "prettier"], // Turn on the plugins and peer plugins
   "extends": [
-    "airbnb", // Use the recommended rules from @eslint-config-airbnb
-    "airbnb-typescript", // Extends previous rules by rules from @eslint-config-airbnb-typescript
     "plugin:@typescript-eslint/eslint-recommended", // Extends previous rules by rules from @typescript-eslint/eslint-plugin
     "plugin:@typescript-eslint/recommended",
     "prettier" // Extends previous rules by rules from @eslint-plugin-prettier
