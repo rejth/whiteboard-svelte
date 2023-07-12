@@ -1,6 +1,10 @@
 {
-  "extends": "@tsconfig/svelte/tsconfig.json",
+  "extends": ["../../tsconfig.base.json", "@tsconfig/svelte/tsconfig.json"],
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["src/*"]
+    },
     "strict": true, // Enable all strict type checking options
     "forceConsistentCasingInFileNames": true, // Disallow inconsistently-cased references to the same file.
     "target": "ESNext", // Specify ECMAScript target version
@@ -28,12 +32,17 @@
     "allowJs": true, // Allow JavaScript files to be compiled
     "checkJs": true,
     "isolatedModules": true,
-    "baseUrl": ".",
-    "paths": {
-      "~/*": ["src/*"]
-    }
+    "types": ["vite/client", "vitest"]
   },
+  "files": [],
   "types": ["src/app/app.d.ts"],
   "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.js", "src/**/*.svelte"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ]
 }

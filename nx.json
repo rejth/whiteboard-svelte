@@ -4,8 +4,8 @@
     "default": {
       "runner": "nx-cloud",
       "options": {
-        "cacheableOperations": ["build", "format:fix", "lint:fix", "test", "e2e"],
-        "accessToken": "MTA1NWUxZTAtM2IyOC00NDI0LWE5ZTUtNzUxZmU1MWYzZTA4fHJlYWQtd3JpdGU="
+        "cacheableOperations": ["build", "lint", "test", "e2e"],
+        "accessToken": "MDQwNmJhNWItNzA4My00MmRhLTg4ZTQtODhlMjViNDE0ZDdjfHJlYWQtd3JpdGU="
       }
     }
   },
@@ -13,14 +13,27 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"]
+    },
+    "test": {
+      "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.js"]
+    },
+    "lint": {
+      "inputs": ["default", "{workspaceRoot}/.eslintrc.json", "{workspaceRoot}/.eslintignore"]
+    },
+    "e2e": {
+      "inputs": ["default", "^production"]
     }
   },
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
-    "production": ["default"],
+    "production": [
+      "default",
+      "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
+      "!{projectRoot}/tsconfig.spec.json",
+      "!{projectRoot}/jest.config.[jt]s",
+      "!{projectRoot}/src/test-setup.[jt]s",
+      "!{projectRoot}/.eslintrc.json"
+    ],
     "sharedGlobals": []
-  },
-  "affected": {
-    "defaultBase": "main"
   }
 }
