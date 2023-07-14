@@ -1,15 +1,18 @@
 <script lang="ts">
-  import { type ComponentType, onMount } from 'svelte';
+  import { type ComponentType, onMount, getContext } from 'svelte';
 
   import { dndWatcher } from '~/shared/lib';
+  import type { Context } from '~/shared/types';
+  import { CONTEXT_KEY } from '~/shared/constants';
+
   import { Drawing } from '~/ui/Drawing';
   import { Tools, type ShapeType, toolbarModel } from '~/ui/Toolbar';
   import { Shape, Note, Text, Area, RectangularDragSelection } from '~/ui/Shape';
 
-  import { canvasModel } from './model';
   import { isDrawingToolSelected } from '../Toolbar/lib';
 
-  const { shapes, mousePosition, selection } = canvasModel;
+  const { canvasStore } = getContext<Context>(CONTEXT_KEY);
+  const { shapes, mousePosition, selection } = canvasStore;
   const { tool } = toolbarModel;
 
   let canvasRef: HTMLDivElement;
@@ -30,26 +33,26 @@
   onMount(async () => {
     const dnd = dndWatcher(canvasRef);
     for await (const e of dnd) {
-      canvasModel.dragCanvas(e as MouseEvent, canvasRef.getBoundingClientRect());
+      canvasStore.dragCanvas(e as MouseEvent, canvasRef.getBoundingClientRect());
     }
   });
 
   onMount(async () => {
     const selection = dndWatcher(canvasRef);
     for await (const e of selection) {
-      canvasModel.dragSelection(e as MouseEvent, canvasRef.getBoundingClientRect());
+      canvasStore.dragSelection(e as MouseEvent, canvasRef.getBoundingClientRect());
     }
   });
 
   const onClick = (e: MouseEvent) => {
-    canvasModel.addShape(e, canvasRef.getBoundingClientRect());
-    canvasModel.resetSelection();
+    canvasStore.addShape(e, canvasRef.getBoundingClientRect());
+    canvasStore.resetSelection();
   };
 
   const onKeydown = (e: KeyboardEvent) => {
     if (e.code === 'ShiftLeft') return (multiselect = true);
     if (e.code === 'Escape') return (clearSelected = true);
-    if (e.code === 'Delete') canvasModel.deleteShape();
+    if (e.code === 'Delete') canvasStore.deleteShape();
   };
 
   const onKeyup = () => {

@@ -35,7 +35,6 @@
     "types": ["vite/client", "vitest"]
   },
   "files": [],
-  "types": ["src/app/app.d.ts"],
   "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.js", "src/**/*.svelte"],
   "references": [
     {

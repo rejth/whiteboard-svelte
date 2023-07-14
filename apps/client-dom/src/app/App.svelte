@@ -1,7 +1,17 @@
 <script lang="ts">
-  import { Canvas } from '~/ui/Canvas';
+  import { setContext } from 'svelte';
+  import { io } from 'socket.io-client';
+
+  import { CONTEXT_KEY } from '~/shared/constants';
+  import { Canvas, CanvasModel } from '~/ui/Canvas';
   import { Toolbar } from '~/ui/Toolbar';
-  import './App.scss';
+
+  const socket = io('http://localhost:3000');
+
+  setContext(CONTEXT_KEY, {
+    socket,
+    canvasStore: new CanvasModel(socket),
+  });
 </script>
 
 <div class="board" role="button" tabindex="0">

@@ -7,17 +7,20 @@ const port = process.env.PORT ? Number(process.env.PORT) : 3000;
 
 const app = express();
 const server = createServer(app);
-const io = new Server(server, {});
 
-const rooms = new Map();
+const io = new Server(server, {
+  cors: { origin: 'http://localhost:4200' },
+});
 
 io.on('connection', (socket) => {
   console.log(`socket ${socket.id} connected`);
 
-  io.to(socket.id).emit('event', rooms);
+  socket.on('order:add', (payload) => {
+    socket.broadcast.emit('order:add', payload);
+  });
 
-  socket.on('event', (payload) => {
-    socket.broadcast.emit('event', payload);
+  socket.on('order:change', (payload) => {
+    socket.broadcast.emit('order:change', payload);
   });
 });
 

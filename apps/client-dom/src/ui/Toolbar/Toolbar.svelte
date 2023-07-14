@@ -1,5 +1,10 @@
 <script lang="ts">
+  import { getContext } from 'svelte';
+
+  import type { Context } from '~/shared/types';
+  import { CONTEXT_KEY } from '~/shared/constants';
   import { Icon } from '~/shared/ui';
+
   import noteIcon from '~/shared/assets/note.svg';
   import textIcon from '~/shared/assets/text.svg';
   import areaIcon from '~/shared/assets/area.svg';
@@ -8,12 +13,12 @@
   import connectIcon from '~/shared/assets/connect.svg';
   import penIcon from '~/shared/assets/pen.svg';
   import trashIcon from '~/shared/assets/trash.svg';
-  import { canvasModel } from '~/ui/Canvas';
 
   import { toolbarModel, Tools, type Tool } from '.';
 
+  const { canvasStore } = getContext<Context>(CONTEXT_KEY);
+  const { selectedShapes } = canvasStore;
   const { tool } = toolbarModel;
-  const { selectedShapes } = canvasModel;
 
   $: tools = [
     {
@@ -68,7 +73,7 @@
   ];
 
   const onClick = (type: Tool) => {
-    if (type === Tools.DELETE) return canvasModel.deleteShape();
+    if (type === Tools.DELETE) return canvasStore.deleteShape();
     toolbarModel.changeTool(type);
   };
 </script>

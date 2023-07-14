@@ -1,8 +1,10 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { getContext, onMount } from 'svelte';
 
   import { clickOutside, dndWatcher } from '~/shared/lib';
-  import { canvasModel, type ShapeConfig } from '~/ui/Canvas';
+  import type { Context } from '~/shared/types';
+  import { CONTEXT_KEY } from '~/shared/constants';
+  import { type ShapeConfig } from '~/ui/Canvas';
 
   import { Selection } from './';
   import { ShapeModel } from '../model';
@@ -11,8 +13,10 @@
   export let multiselect: boolean;
   export let clearSelected: boolean;
 
-  const shapeModel = new ShapeModel(settings);
-  const { selection } = canvasModel;
+  const { socket, canvasStore } = getContext<Context>(CONTEXT_KEY);
+  const shapeModel = new ShapeModel(settings, socket, canvasStore);
+
+  const { selection } = canvasStore;
   const { shape } = shapeModel;
 
   const deleteIcon = document.getElementById('toolbar');
@@ -25,7 +29,6 @@
   `;
 
   $: shapeModel.overlap($selection);
-
   $: clearSelected ? onClickOutside() : null;
 
   onMount(async () => {
@@ -38,16 +41,18 @@
   const onClickOutside = () => {
     if (multiselect) return;
     shapeModel.select(false);
-    canvasModel.clearAllSelected();
+    canvasStore.clearAllSelected();
   };
 
   const onSelect = () => {
     shapeModel.select(true);
-    canvasModel.selectShape(settings);
+    canvasStore.selectShape(settings);
   };
 </script>
 
 <div
+  tabindex="0"
+  role="button"
   class="shape-wrapper"
   use:clickOutside={{ exclude: [deleteIcon] }}
   on:mousedown={onSelect}

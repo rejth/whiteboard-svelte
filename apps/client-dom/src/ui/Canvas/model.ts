@@ -1,5 +1,7 @@
 import { get, type Writable, writable } from 'svelte/store';
-import { v4 } from 'uuid';
+import { v4 as uuid } from 'uuid';
+
+import type { Context } from '~/shared/types';
 
 import { type ShapeType, toolbarModel, Tools, type Tool } from '../Toolbar';
 import { isDrawingToolSelected } from '../Toolbar/lib';
@@ -30,18 +32,24 @@ const dimensions: Record<ShapeType, Dimension> = {
   TEXT: { width: 90, height: 30 },
 };
 
-class CanvasModel {
-  shapes: Writable<Set<ShapeConfig>> = writable(new Set());
+export class CanvasModel {
+  shapes: Writable<Map<string, ShapeConfig>> = writable(new Map());
   selectedShapes: Writable<Map<string, ShapeConfig>> = writable(new Map());
   selection: Writable<Point[]> = writable([]);
   mousePosition: Writable<Point> = writable({ x: 0, y: 0 });
 
   #geometryManager: GeometryManager;
+  #socket: Context['socket'];
   shapeType: ShapeType | null = null;
   tool: Tool = Tools.PAN;
 
-  constructor() {
+  constructor(socket: Context['socket']) {
     this.#geometryManager = new GeometryManager();
+    this.#socket = socket;
+
+    this.#socket.on('order:add', (payload: ShapeConfig) => {
+      this.shapes.update((shapes) => shapes.set(payload.uuid, payload));
+    });
 
     toolbarModel.shapeType.subscribe((value) => {
       this.shapeType = value;
@@ -79,8 +87,11 @@ class CanvasModel {
     return new Map([...store.entries()].filter(([key]) => !selected.has(key)));
   }
 
-  #removeShapes(store: Set<ShapeConfig>, selected: Map<string, ShapeConfig>): Set<ShapeConfig> {
-    return new Set([...store].filter((shape) => !selected.has(shape.uuid)));
+  #removeShapes(
+    store: Map<string, ShapeConfig>,
+    selected: Map<string, ShapeConfig>,
+  ): Map<string, ShapeConfig> {
+    return new Map([...store.entries()].filter(([key]) => !selected.has(key)));
   }
 
   dragCanvas(e: MouseEvent, rect: DOMRect): void {
@@ -110,13 +121,14 @@ class CanvasModel {
   addShape(e: MouseEvent, rect: DOMRect): void {
     if (!this.shapeType) return;
     const position = this.#geometryManager.getMousePosition(e, rect);
-    const shape = this.#createShape(v4(), this.shapeType, position);
-
-    this.shapes.update((shapes) => shapes.add(shape));
+    const shape = this.#createShape(uuid(), this.shapeType, position);
     this.selectShape(shape);
 
+    this.shapes.update((shapes) => shapes.set(shape.uuid, shape));
     toolbarModel.tool.set(Tools.PAN);
     toolbarModel.shapeType.set(null);
+
+    this.#socket.emit('order:add', shape);
   }
 
   selectShape(shape: ShapeConfig): void {
@@ -143,5 +155,3 @@ class CanvasModel {
     });
   }
 }
-
-export const canvasModel = new CanvasModel();

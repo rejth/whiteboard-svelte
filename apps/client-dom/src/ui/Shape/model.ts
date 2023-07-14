@@ -1,38 +1,48 @@
 import { type Writable, writable, get } from 'svelte/store';
 
-import { canvasModel, type ShapeConfig } from '../Canvas';
+import type { Context } from '~/shared/types';
+
+import { type ShapeConfig } from '../Canvas';
 import { GeometryManager, type Point } from '../../shared/services';
 
 export class ShapeModel {
-  shape: Writable<ShapeConfig | null> = writable(null);
+  shape: Writable<ShapeConfig> = writable();
 
   #geometryManager: GeometryManager;
+  #canvasStore: Context['canvasStore'];
+  #socket: Context['socket'];
   allSelected: Map<string, ShapeConfig> = new Map();
 
-  constructor(config: ShapeConfig) {
+  constructor(config: ShapeConfig, socket: Context['socket'], canvasStore: Context['canvasStore']) {
     this.#geometryManager = new GeometryManager();
+    this.#canvasStore = canvasStore;
+    this.#socket = socket;
     this.shape.set(config);
 
-    canvasModel.selectedShapes.subscribe((value) => {
+    this.#socket.on('order:change', (payload: ShapeConfig) => {
+      if (get(this.shape).uuid !== payload.uuid) return;
+      this.shape.set(payload);
+    });
+
+    canvasStore.selectedShapes.subscribe((value) => {
       this.allSelected = value;
     });
   }
 
   overlap(path: Point[]): void {
     if (path.length === 0) return;
-    const shape = get(this.shape) as ShapeConfig;
-    const rect = shape?.rect;
+    const shape = get(this.shape);
 
     const dimension = this.#geometryManager.getRectDimension(path);
     const position = this.#geometryManager.getRectPosition(dimension);
-    const overlapped = this.#geometryManager.overlapRect(position, rect);
+    const overlapped = this.#geometryManager.overlapRect(position, shape?.rect);
 
     if (overlapped) {
       if (!this.allSelected.has(shape.uuid)) {
-        canvasModel.selectShape(shape);
+        this.#canvasStore.selectShape(shape);
       }
     } else {
-      canvasModel.deselectShape(shape);
+      this.#canvasStore.deselectShape(shape);
     }
 
     this.select(overlapped);
@@ -40,21 +50,21 @@ export class ShapeModel {
 
   move(e: MouseEvent, rect: DOMRect): void {
     this.shape.update((shape) => {
-      const { x, y } = shape as ShapeConfig;
-      return {
-        ...(shape as ShapeConfig),
-        ...this.#geometryManager.move(e, { x, y }),
-        rect,
-      };
+      const { x, y } = shape;
+      const position = this.#geometryManager.move(e, { x, y });
+      return { ...shape, ...position, rect };
     });
+    this.#socket.emit('order:change', get(this.shape));
   }
 
   resize(e: MouseEvent, rect: DOMRect): void {
-    const { width, height } = this.#geometryManager.resize(e, rect);
-    this.shape.update((shape) => ({ ...(shape as ShapeConfig), width, height, rect }));
+    const dimension = this.#geometryManager.resize(e, rect);
+    this.shape.update((shape) => ({ ...shape, ...dimension, rect }));
+    this.#socket.emit('order:change', get(this.shape));
   }
 
   select(selected: boolean): void {
-    this.shape.update((shape) => ({ ...(shape as ShapeConfig), selected }));
+    this.shape.update((shape) => ({ ...shape, selected }));
+    this.#socket.emit('order:change', get(this.shape));
   }
 }

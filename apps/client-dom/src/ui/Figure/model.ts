@@ -1,10 +1,10 @@
 import { type Writable, writable, get } from 'svelte/store';
 
-import { GeometryManager, type Point } from '../../shared/services';
+import { GeometryManager } from '../../shared/services';
 import type { FigureConfig } from '../Drawing';
 
 export class FigureModel {
-  figure: Writable<FigureConfig | null> = writable(null);
+  figure: Writable<FigureConfig> = writable();
   #geometryManager: GeometryManager;
 
   constructor(attributes: FigureConfig) {
@@ -14,13 +14,13 @@ export class FigureModel {
 
   calculateQuadraticCurveSVGPath(e: MouseEvent, rect: DOMRect): void {
     const figure = get(this.figure);
-    const from = figure?.path[0] as Point;
-    const to = figure?.path[figure.path.length - 1] as Point;
+    const from = figure?.path[0];
+    const to = figure?.path[figure.path.length - 1];
 
     const peakCurvePoint = this.#geometryManager.getMousePosition(e, rect);
 
     this.figure.update((value) => ({
-      ...(value as FigureConfig),
+      ...value,
       svgPath: this.#geometryManager.getQuadraticCurveSVGPath(from, to, peakCurvePoint),
     }));
   }
